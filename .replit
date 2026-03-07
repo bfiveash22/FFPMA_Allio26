@@ -1,0 +1,68 @@
+modules = ["nodejs-20", "web", "python-3.11", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["ffmpeg", "freetype", "glibcLocales", "jq"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[env]
+PORT = "5000"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
+run = ["node", "./dist/index.cjs"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Allio"
+mode = "parallel"
+author = 52682891
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Project"
+
+[agent]
+mockupState = "FULLSTACK"
+integrations = ["google-mail:1.0.0", "google-drive:1.0.0", "javascript_database:1.0.0", "javascript_openai_ai_integrations:2.0.0", "javascript_gemini_ai_integrations:2.0.0", "javascript_anthropic_ai_integrations:2.0.0"]
+
+[userenv]
+
+[userenv.shared]
+WOOCOMMERCE_URL = "https://www.forgottenformula.com"
+WP_SITE_URL = "https://www.forgottenformula.com"
+SIGNNOW_DOCTOR_ONBOARDING_TEMPLATE_ID = "253597f6c6724abd976af62a69b3e0a5b92b38dd"
+WP_USERNAME = "blake"
+STAGING_WC_URL = "https://wordpress-1347597-6126502.cloudwaysapps.com"
+STAGING_WP_SITE_URL = "https://wordpress-1347597-6126502.cloudwaysapps.com"
+USE_STAGING = "false"
