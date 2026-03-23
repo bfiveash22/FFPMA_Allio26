@@ -32,7 +32,7 @@ export function getSession() {
   });
   const isProduction = process.env.NODE_ENV === 'production' || !!process.env.REPL_SLUG;
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET! + "_v2",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
