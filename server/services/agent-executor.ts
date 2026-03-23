@@ -3,8 +3,160 @@ import { findAllioFolder, createSubfolder, findFolderByName, getUncachableGoogle
 import { storage } from '../storage';
 import { Readable } from 'stream';
 import OpenAI from 'openai';
+import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { sentinel } from './sentinel';
 import { agents, FFPMA_CREED } from '../../shared/agents';
+import * as fs from 'fs';
+import * as path from 'path';
+import pptxgen from 'pptxgenjs';
+
+const openAITools = [
+  {
+    type: "function" as const,
+    function: {
+      name: "read_file",
+      description: "Read the contents of a file at a specific path.",
+      parameters: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Absolute or relative path to the file." }
+        },
+        required: ["path"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "write_file",
+      description: "Write content to a file. Overwrites the file if it exists, creates it if it doesn't.",
+      parameters: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Absolute or relative path to the file." },
+          content: { type: "string", description: "The content to write to the file." }
+        },
+        required: ["path", "content"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "list_directory",
+      description: "List the contents of a directory.",
+      parameters: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Path to the directory." }
+        },
+        required: ["path"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "generate_presentation",
+      description: "Generate a .pptx slide deck presentation using pptxgenjs.",
+      parameters: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Output path for the .pptx file, e.g., './presentation.pptx'." },
+          slides: {
+            type: "array",
+            description: "An array of slides to create.",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string", description: "Slide Title" },
+                body: { 
+                  type: "array", 
+                  items: { type: "string" },
+                  description: "Bullet points for the slide body."
+                }
+              },
+              required: ["title", "body"]
+            }
+          }
+        },
+        required: ["path", "slides"]
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "synthesize_documents",
+      description: "Generate a synthesized audio podcast (NotebookLM style) using OpenAI TTS.",
+      parameters: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Output path for the .mp3 file, e.g., './podcast.mp3'." },
+          transcript: { type: "string", description: "The conversational transcript to synthesize into audio." }
+        },
+        required: ["path", "transcript"]
+      }
+    }
+  }
+];
+
+async function executeToolCall(name: string, argsStr: string): Promise<string> {
+  try {
+    const args = JSON.parse(argsStr);
+    const basePath = process.cwd();
+    
+    switch (name) {
+      case 'read_file': {
+        const fullPath = path.resolve(basePath, args.path);
+        if (!fs.existsSync(fullPath)) return `Error: File not found at ${fullPath}`;
+        return fs.readFileSync(fullPath, 'utf8');
+      }
+      case 'write_file': {
+        const fullPath = path.resolve(basePath, args.path);
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(fullPath, args.content, 'utf8');
+        return `Successfully wrote to ${fullPath}`;
+      }
+      case 'list_directory': {
+        const fullPath = path.resolve(basePath, args.path);
+        if (!fs.existsSync(fullPath)) return `Error: Directory not found at ${fullPath}`;
+        const files = fs.readdirSync(fullPath);
+        return `Contents of ${fullPath}:\n${files.join('\n')}`;
+      }
+      case 'generate_presentation': {
+        const fullPath = path.resolve(basePath, args.path);
+        const pres = new pptxgen();
+        for (const slideData of args.slides) {
+          const slide = pres.addSlide();
+          slide.addText(slideData.title || '', { x: 0.5, y: 0.5, fontSize: 32, bold: true, color: '1a365d' });
+          if (slideData.body && Array.isArray(slideData.body)) {
+            const bulletText = slideData.body.map((text: string) => ({ text, options: { bullet: true, fontSize: 18 } }));
+            slide.addText(bulletText, { x: 0.5, y: 1.5, w: '90%', h: '70%' });
+          }
+        }
+        await pres.writeFile({ fileName: fullPath });
+        return `Successfully created presentation at ${fullPath}`;
+      }
+      case 'synthesize_documents': {
+        const fullPath = path.resolve(basePath, args.path);
+        const mp3 = await openai.audio.speech.create({
+          model: "tts-1",
+          voice: "alloy",
+          input: args.transcript,
+        });
+        const buffer = Buffer.from(await mp3.arrayBuffer());
+        fs.writeFileSync(fullPath, buffer);
+        return `Successfully synthesized audio podcast at ${fullPath}`;
+      }
+      default:
+        return `Error: Unknown tool ${name}`;
+    }
+  } catch (error: any) {
+    return `Error executing ${name}: ${error.message}`;
+  }
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -429,24 +581,71 @@ Requirements:
 - Include specific details relevant to healthcare, healing, and the PMA's mission
 - Format with clear sections using markdown
 - End with how this contributes to our mission of true healing
+- You have access to powerful tools to read files, list directories, and write code.
+- DO NOT just generate a document if your task implies implementing code or modifying the project physically. USE YOUR TOOLS to implement the output natively.
+- Once finished executing tools, summarize your completed work and provide any necessary findings or confirmation text.
 
-Generate the full document now:`;
+Begin your work:`;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ],
-    max_completion_tokens: 4000,
-    temperature: 0.7,
-  });
+  let messages: ChatCompletionMessageParam[] = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt }
+  ];
 
-  const rawContent = completion.choices[0]?.message?.content || "Document generation failed.";
+  let iterations = 0;
+  const MAX_ITERATIONS = 7;
+  let finalContent = "";
+
+  while (iterations < MAX_ITERATIONS) {
+    console.log(`[Agent Executor (${agentId})] Iteration ${iterations + 1}/${MAX_ITERATIONS}...`);
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: messages,
+      tools: openAITools,
+      tool_choice: "auto",
+      max_completion_tokens: 4000,
+      temperature: 0.7,
+    });
+
+    const message = completion.choices[0]?.message;
+    if (!message) {
+      return "Critical failure communicating with agent network.";
+    }
+
+    messages.push(message);
+
+    if (!message.tool_calls || message.tool_calls.length === 0) {
+      finalContent = message.content || 'Task completed successfully natively. No additional text generated.';
+      break;
+    }
+
+    for (const toolCall of message.tool_calls) {
+      if (toolCall.type === 'function') {
+        console.log(`[Agent Executor (${agentId})] Called tool: ${toolCall.function.name}`);
+        const result = await executeToolCall(toolCall.function.name, toolCall.function.arguments);
+        messages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: result
+        });
+      }
+    }
+
+    iterations++;
+  }
+
+  if (iterations >= MAX_ITERATIONS) {
+    const lastMsg = messages[messages.length - 1];
+    let possibleContent = "";
+    if ('content' in lastMsg && typeof lastMsg.content === 'string') {
+        possibleContent = lastMsg.content;
+    }
+    finalContent = possibleContent || "Reached maximum iteration limit. Task may be incomplete.";
+  }
   
   // Apply spell-check before returning
-  const correctedContent = spellCheckContent(rawContent);
-  console.log(`[Agent Executor] Spell-check applied to document`);
+  const correctedContent = spellCheckContent(finalContent);
+  console.log(`[Agent Executor] Spell-check applied to agent execution summary.`);
   
   return correctedContent;
 }
