@@ -10,7 +10,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { VideoBackground, PEXELS_VIDEOS } from "@/components/video-background";
 import heroBanner from "@/assets/allio_hero_banner_landscape.png";
-import allioIntroVideo from "@assets/generated_videos/allio_v1_intro_video.mp4";
 import {
   Shield,
   Dna,
@@ -441,12 +440,9 @@ export default function LandingPage() {
               </h2>
             </div>
             <div className="mx-auto max-w-4xl overflow-hidden rounded-xl border border-border/50 shadow-2xl">
-              <video 
-                src={allioIntroVideo} 
-                autoPlay 
-                loop 
-                muted 
-                playsInline
+              <img
+                src={heroBanner}
+                alt="The Future of Healing"
                 className="w-full aspect-video object-cover"
                 data-testid="video-intro"
               />
