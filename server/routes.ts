@@ -6578,6 +6578,183 @@ Status: DRAFT - Pending Trustee Review`,
     }
   });
 
+  // ========== Agent Knowledge API ==========
+  app.get("/api/agents/:agentId/knowledge", requireRole("admin"), async (req: Request, res: Response) => {
+    try {
+      const { agentKnowledge } = await import("@shared/schema");
+      const { and } = await import("drizzle-orm");
+      const agentId = req.params.agentId.toUpperCase();
+      const items = await db.select().from(agentKnowledge)
+        .where(and(eq(agentKnowledge.agentId, agentId), eq(agentKnowledge.isActive, true)))
+        .orderBy(agentKnowledge.createdAt);
+      res.json({ success: true, items });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/agents/:agentId/knowledge", requireRole("admin"), upload.single("file"), async (req: Request, res: Response) => {
+    try {
+      const { agentKnowledge } = await import("@shared/schema");
+      const agentId = req.params.agentId.toUpperCase();
+      const { knowledgeType, displayName, referencePath, metadata } = req.body;
+
+      if (!knowledgeType || !displayName) {
+        return res.status(400).json({ success: false, error: "knowledgeType and displayName are required" });
+      }
+
+      const validTypes = ["file", "api", "url", "ml_note"];
+      if (!validTypes.includes(knowledgeType)) {
+        return res.status(400).json({ success: false, error: `knowledgeType must be one of: ${validTypes.join(", ")}` });
+      }
+
+      if (knowledgeType === "file" && !req.file) {
+        return res.status(400).json({ success: false, error: "A file must be provided when knowledgeType is 'file'" });
+      }
+
+      if ((knowledgeType === "url" || knowledgeType === "api") && !referencePath) {
+        return res.status(400).json({ success: false, error: "referencePath (URL/endpoint) is required for url and api knowledge types" });
+      }
+
+      if ((knowledgeType === "url" || knowledgeType === "api") && referencePath) {
+        try {
+          const parsed = new URL(referencePath);
+          if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            return res.status(400).json({ success: false, error: "referencePath must use http or https scheme" });
+          }
+        } catch {
+          return res.status(400).json({ success: false, error: "referencePath must be a valid URL" });
+        }
+      }
+
+      let driveFileId: string | undefined;
+      let finalReferencePath = referencePath || null;
+
+      if (knowledgeType === "file" && req.file) {
+        const { findAllioFolder, findFolderByName, createSubfolder, getUncachableGoogleDriveClient } = await import("./services/drive");
+        const { Readable } = await import("stream");
+
+        const allioFolder = await findAllioFolder();
+        if (!allioFolder) throw new Error("ALLIO folder not found in Drive");
+
+        let divisionsFolder = await findFolderByName(allioFolder.id, "02_DIVISIONS");
+        if (!divisionsFolder) {
+          const f = await createSubfolder(allioFolder.id, "02_DIVISIONS");
+          divisionsFolder = f.id;
+        }
+
+        const agentDivisionMap: Record<string, string> = {
+          SENTINEL: "Executive", ATHENA: "Executive", HERMES: "Executive",
+          MUSE: "Marketing", PRISM: "Marketing", AURORA: "Marketing", PIXEL: "Marketing", PEXEL: "Marketing",
+          FORGE: "Engineering", DAEDALUS: "Engineering", NEXUS: "Engineering", CYPHER: "Engineering", ARACHNE: "Engineering", ARCHITECT: "Engineering", SERPENS: "Engineering",
+          JURIS: "Legal", LEXICON: "Legal", AEGIS: "Legal", SCRIBE: "Legal", GAVEL: "Legal",
+          ATLAS: "Financial", BLOCKFORGE: "Financial", RONIN: "Financial", MERCURY: "Financial",
+          PROMETHEUS: "Science", HELIX: "Science", PARACELSUS: "Science", HIPPOCRATES: "Science", RESONANCE: "Science", SYNTHESIS: "Science", VITALIS: "Science", TERRA: "Science", MICROBIA: "Science", ENTHEOS: "Science", ORACLE: "Science", QUANTUM: "Science", NOVA: "Science",
+        };
+
+        const division = agentDivisionMap[agentId] || "Support";
+
+        let divisionFolder = await findFolderByName(divisionsFolder, division);
+        if (!divisionFolder) {
+          const f = await createSubfolder(divisionsFolder, division);
+          divisionFolder = f.id;
+        }
+
+        let agentFolder = await findFolderByName(divisionFolder, agentId);
+        if (!agentFolder) {
+          const f = await createSubfolder(divisionFolder, agentId);
+          agentFolder = f.id;
+        }
+
+        let knowledgeFolder = await findFolderByName(agentFolder, "knowledge");
+        if (!knowledgeFolder) {
+          const f = await createSubfolder(agentFolder, "knowledge");
+          knowledgeFolder = f.id;
+        }
+
+        const drive = await getUncachableGoogleDriveClient();
+        const ext = req.file.originalname.split('.').pop()?.toLowerCase() || '';
+        const mimeTypeMap: Record<string, string> = {
+          pdf: 'application/pdf', csv: 'text/csv', txt: 'text/plain',
+          doc: 'application/msword', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        };
+        const mimeType = mimeTypeMap[ext] || req.file.mimetype || 'application/octet-stream';
+
+        const uploaded = await drive.files.create({
+          requestBody: { name: req.file.originalname, parents: [knowledgeFolder] },
+          media: { mimeType, body: Readable.from(req.file.buffer) },
+          fields: 'id, webViewLink',
+        });
+
+        driveFileId = uploaded.data.id || undefined;
+        finalReferencePath = uploaded.data.webViewLink || `https://drive.google.com/file/d/${driveFileId}/view`;
+      }
+
+      const initialStatus = knowledgeType === "file" && driveFileId ? "processing" : "active";
+      const [item] = await db.insert(agentKnowledge).values({
+        agentId,
+        knowledgeType,
+        displayName,
+        referencePath: finalReferencePath,
+        driveFileId: driveFileId || null,
+        metadata: metadata || null,
+        status: initialStatus,
+        isActive: true,
+        uploadedBy: (req as any).user?.claims?.sub || "trustee",
+      }).returning();
+
+      if (knowledgeType === "file" && driveFileId && item) {
+        (async () => {
+          try {
+            const { extractFileFromDrive, summarizeDocumentForContext } = await import("./services/pdf-extractor");
+            const { agentKnowledge: akTable } = await import("@shared/schema");
+            const extracted = await extractFileFromDrive(driveFileId);
+            const summary = await summarizeDocumentForContext(extracted.text, extracted.title);
+            let existingMeta: Record<string, any> = {};
+            if (metadata) { try { existingMeta = JSON.parse(metadata); } catch {} }
+            await db.update(akTable)
+              .set({ metadata: JSON.stringify({ ...existingMeta, cachedSummary: summary }), status: "active" })
+              .where(eq(akTable.id, item.id));
+          } catch (err) {
+            console.warn(`[Agent Knowledge] Background summarization failed for item ${item.id}:`, err);
+            const { agentKnowledge: akTable } = await import("@shared/schema");
+            await db.update(akTable).set({ status: "error" }).where(eq(akTable.id, item.id));
+          }
+        })();
+      }
+
+      res.json({ success: true, item });
+    } catch (error: any) {
+      console.error("[Agent Knowledge] Upload error:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.delete("/api/agents/:agentId/knowledge/:itemId", requireRole("admin"), async (req: Request, res: Response) => {
+    try {
+      const { agentKnowledge } = await import("@shared/schema");
+      const { and } = await import("drizzle-orm");
+      const agentId = req.params.agentId.toUpperCase();
+      const itemId = req.params.itemId;
+
+      const existing = await db.select().from(agentKnowledge)
+        .where(and(eq(agentKnowledge.id, itemId), eq(agentKnowledge.agentId, agentId)))
+        .limit(1);
+
+      if (!existing.length) {
+        return res.status(404).json({ success: false, error: "Knowledge item not found" });
+      }
+
+      await db.update(agentKnowledge)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(agentKnowledge.id, itemId));
+
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Practice Analytics
   app.get("/api/doctor/analytics", requireRole("admin", "doctor"), async (req: Request, res: Response) => {
     try {

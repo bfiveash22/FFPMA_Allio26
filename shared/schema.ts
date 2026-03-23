@@ -1925,3 +1925,23 @@ export const dailyBriefings = pgTable("daily_briefings", {
 export const insertDailyBriefingSchema = createInsertSchema(dailyBriefings).omit({ id: true, createdAt: true });
 export type InsertDailyBriefing = z.infer<typeof insertDailyBriefingSchema>;
 export type DailyBriefing = typeof dailyBriefings.$inferSelect;
+
+// Agent Knowledge - Per-agent knowledge resources (files, URLs, API endpoints, ML notes)
+export const agentKnowledge = pgTable("agent_knowledge", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  knowledgeType: varchar("knowledge_type", { length: 20 }).notNull(), // file, api, url, ml_note
+  displayName: varchar("display_name").notNull(),
+  referencePath: varchar("reference_path"), // Drive file path or URL
+  driveFileId: varchar("drive_file_id"), // Google Drive file ID for uploaded files
+  metadata: text("metadata"), // JSON string for extra metadata
+  status: varchar("status", { length: 20 }).default("active"), // active, processing, error
+  isActive: boolean("is_active").default(true),
+  uploadedBy: varchar("uploaded_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAgentKnowledgeSchema = createInsertSchema(agentKnowledge).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertAgentKnowledge = z.infer<typeof insertAgentKnowledgeSchema>;
+export type AgentKnowledge = typeof agentKnowledge.$inferSelect;

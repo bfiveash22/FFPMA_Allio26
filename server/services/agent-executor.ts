@@ -374,6 +374,11 @@ ${profile ? `Agent style: ${profile.specialty}` : ''}`;
   return prompt;
 }
 
+async function getAgentKnowledgeContext(agentId: string): Promise<string> {
+  const { getAgentKnowledgeContext: sharedGetKnowledge } = await import('./agent-knowledge-context');
+  return sharedGetKnowledge(agentId);
+}
+
 async function generateDocument(taskTitle: string, taskDescription: string, agentId: string, division: string): Promise<string> {
   const profile = getAgentProfile(agentId);
   
@@ -394,6 +399,8 @@ Embody this identity in everything you create. Your outputs should reflect your 
 `;
   }
 
+  const knowledgeContext = await getAgentKnowledgeContext(agentId);
+
   const systemPrompt = `${FFPMA_MISSION_TRAINING}
 
 ${agentContext}
@@ -403,7 +410,7 @@ You are ${profile?.name || agentId.toUpperCase()}, ${profile?.title || 'an AI ag
 YOUR DIVISION: ${division.toUpperCase()}
 YOUR PURPOSE: Create outputs that advance the healing mission and serve members.
 
-Remember: You're not just generating a document - you're contributing to a movement that prioritizes healing over profits, nature over synthetic, and member sovereignty over corporate control.`;
+Remember: You're not just generating a document - you're contributing to a movement that prioritizes healing over profits, nature over synthetic, and member sovereignty over corporate control.${knowledgeContext ? `\n\n${knowledgeContext}` : ''}`;
   
   const userPrompt = `Generate a complete, professional document for the following task:
 

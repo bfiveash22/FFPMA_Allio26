@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { agentRegistry, agentTasks, sentinelNotifications, InsertAgentRegistry, InsertAgentTask, AgentTask, AgentRegistry } from '@shared/schema';
+import { agentRegistry, agentTasks, sentinelNotifications, agentKnowledge, InsertAgentRegistry, InsertAgentTask, AgentTask, AgentRegistry } from '@shared/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { agents } from '@shared/agents';
 import { AGENT_DIVISIONS, Division, sentinel } from './sentinel';
@@ -234,6 +234,11 @@ export class SentinelOrchestrator {
     return true;
   }
 
+  async getAgentKnowledgeContext(agentId: string): Promise<string> {
+    const { getAgentKnowledgeContext } = await import('./agent-knowledge-context');
+    return getAgentKnowledgeContext(agentId);
+  }
+
   async routeToAIModel(agentId: string, query: string, context?: string): Promise<{
     response: string;
     model: string;
@@ -260,18 +265,26 @@ export class SentinelOrchestrator {
     }
 
     const profile = agents.find(a => a.id.toUpperCase() === agentId.toUpperCase());
+
+    const knowledgeContext = await this.getAgentKnowledgeContext(agentId);
+
     const systemPrompt = `You are ${profile?.name || agentId}, ${profile?.title || 'an AI agent'} at Forgotten Formula PMA.
 Division: ${agent?.division || 'executive'}
 Specialty: ${profile?.specialty || 'General operations'}
 Voice: ${profile?.voice || 'Professional and helpful'}
 
-You serve the healing mission with integrity. No agent lies. No agent pretends to work.`;
+You serve the healing mission with integrity. No agent lies. No agent pretends to work.${knowledgeContext ? `\n\n${knowledgeContext}` : ''}`;
+
+    const userContent = [
+      context ? `Context: ${context}` : '',
+      query,
+    ].filter(Boolean).join('\n\n');
 
     const completion = await openai.chat.completions.create({
       model: modelConfig.model,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: context ? `Context: ${context}\n\n${query}` : query },
+        { role: 'user', content: userContent },
       ],
       max_completion_tokens: 1000,
     });

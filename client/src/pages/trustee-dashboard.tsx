@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -3818,92 +3818,356 @@ export default function TrusteeDashboard() {
       {/* Agent Chat Modal */}
       <AnimatePresence>
         {selectedAgent && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm overflow-hidden"
-            onClick={() => setSelectedAgent(null)}
-            data-testid="agent-chat-modal"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-xl shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-                      <Bot className="w-5 h-5 text-cyan-400" />
-                    </div>
-                    <div>
-                      <h2 className="font-bold text-lg">{selectedAgent.name}</h2>
-                      <p className="text-xs text-white/50">{selectedAgent.title}</p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => setSelectedAgent(null)}>
-                    <span className="text-lg">✕</span>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-4" style={{ overscrollBehavior: 'contain' }}>
-                <div className="space-y-4">
-                  {agentMessages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[80%] p-3 rounded-lg ${
-                        msg.role === "user" 
-                          ? "bg-cyan-500/20 text-cyan-100" 
-                          : "bg-white/5 text-white/90"
-                      }`}>
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                  {agentLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
-                          <span className="text-sm text-white/50">{selectedAgent.name} is thinking...</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Input */}
-              <div className="p-4 border-t border-white/10">
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={agentInput}
-                    onChange={(e) => setAgentInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendAgentMessage()}
-                    placeholder={`Message ${selectedAgent.name}...`}
-                    className="flex-1 bg-white/5 border-white/10"
-                    disabled={agentLoading}
-                    data-testid="agent-chat-input"
-                  />
-                  <Button 
-                    onClick={sendAgentMessage} 
-                    disabled={agentLoading || !agentInput.trim()}
-                    className="bg-cyan-500 hover:bg-cyan-600"
-                    data-testid="agent-chat-send"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <AgentChatModal
+            agent={selectedAgent}
+            messages={agentMessages}
+            input={agentInput}
+            loading={agentLoading}
+            onClose={() => setSelectedAgent(null)}
+            onInputChange={setAgentInput}
+            onSend={sendAgentMessage}
+          />
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+interface AgentChatModalProps {
+  agent: typeof import("@shared/agents").agents[0];
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  input: string;
+  loading: boolean;
+  onClose: () => void;
+  onInputChange: (v: string) => void;
+  onSend: () => void;
+}
+
+function AgentChatModal({ agent, messages, input, loading, onClose, onInputChange, onSend }: AgentChatModalProps) {
+  const [activeTab, setActiveTab] = useState<"chat" | "knowledge">("chat");
+  const { toast } = useToast();
+
+  const { data: knowledgeData, refetch: refetchKnowledge } = useQuery({
+    queryKey: [`/api/agents/${agent.id}/knowledge`],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/agents/${agent.id}/knowledge`);
+      return res.json();
+    },
+  });
+
+  const knowledgeItems: Array<{
+    id: string; knowledgeType: string; displayName: string; referencePath?: string; createdAt?: string; status?: string;
+  }> = knowledgeData?.items || [];
+
+  const [knowledgeType, setKnowledgeType] = useState<"file" | "url" | "api" | "ml_note">("url");
+  const [knowledgeDisplayName, setKnowledgeDisplayName] = useState("");
+  const [knowledgeUrl, setKnowledgeUrl] = useState("");
+  const [knowledgeFile, setKnowledgeFile] = useState<File | null>(null);
+  const [knowledgeNotes, setKnowledgeNotes] = useState("");
+  const [knowledgeUploading, setKnowledgeUploading] = useState(false);
+
+  const typeIcon: Record<string, React.ReactNode> = {
+    file: <FileText className="w-4 h-4 text-blue-400" />,
+    url: <Globe className="w-4 h-4 text-green-400" />,
+    api: <Zap className="w-4 h-4 text-yellow-400" />,
+    ml_note: <Brain className="w-4 h-4 text-purple-400" />,
+  };
+
+  const typeLabel: Record<string, string> = {
+    file: "File", url: "URL", api: "API Endpoint", ml_note: "ML Note",
+  };
+
+  const handleAddKnowledge = async () => {
+    if (!knowledgeDisplayName.trim()) {
+      toast({ title: "Display name required", variant: "destructive" });
+      return;
+    }
+    if ((knowledgeType === "url" || knowledgeType === "api") && !knowledgeUrl.trim()) {
+      toast({ title: "URL/endpoint required", variant: "destructive" });
+      return;
+    }
+    if (knowledgeType === "file" && !knowledgeFile) {
+      toast({ title: "Please select a file", variant: "destructive" });
+      return;
+    }
+    if (knowledgeType === "ml_note" && !knowledgeNotes.trim()) {
+      toast({ title: "Capability description required for ML notes", variant: "destructive" });
+      return;
+    }
+
+    setKnowledgeUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("knowledgeType", knowledgeType);
+      formData.append("displayName", knowledgeDisplayName.trim());
+      if ((knowledgeType === "url" || knowledgeType === "api") && knowledgeUrl.trim()) formData.append("referencePath", knowledgeUrl.trim());
+      if (knowledgeNotes.trim()) formData.append("metadata", JSON.stringify({ notes: knowledgeNotes.trim() }));
+      if (knowledgeType === "file" && knowledgeFile) formData.append("file", knowledgeFile);
+
+      const res = await fetch(`/api/agents/${agent.id}/knowledge`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Upload failed");
+
+      toast({ title: "Knowledge added", description: `${knowledgeDisplayName} added to ${agent.name}` });
+      setKnowledgeDisplayName("");
+      setKnowledgeUrl("");
+      setKnowledgeFile(null);
+      setKnowledgeNotes("");
+      refetchKnowledge();
+    } catch (err: any) {
+      toast({ title: "Failed to add knowledge", description: err.message, variant: "destructive" });
+    } finally {
+      setKnowledgeUploading(false);
+    }
+  };
+
+  const handleDeleteKnowledge = async (itemId: string, name: string) => {
+    try {
+      const res = await apiRequest("DELETE", `/api/agents/${agent.id}/knowledge/${itemId}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Delete failed");
+      toast({ title: "Knowledge removed", description: `${name} removed from ${agent.name}` });
+      refetchKnowledge();
+    } catch (err: any) {
+      toast({ title: "Failed to remove knowledge", description: err.message, variant: "destructive" });
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm overflow-hidden"
+      onClick={onClose}
+      data-testid="agent-chat-modal"
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-white/10 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div>
+                <h2 className="font-bold text-lg">{agent.name}</h2>
+                <p className="text-xs text-white/50">{agent.title}</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <span className="text-lg">✕</span>
+            </Button>
+          </div>
+          {/* Tabs */}
+          <div className="flex gap-1 mt-3">
+            <button
+              className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${activeTab === "chat" ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "text-white/50 hover:text-white/70"}`}
+              onClick={() => setActiveTab("chat")}
+            >
+              <MessageSquare className="w-3 h-3 inline mr-1" />Chat
+            </button>
+            <button
+              className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${activeTab === "knowledge" ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" : "text-white/50 hover:text-white/70"}`}
+              onClick={() => setActiveTab("knowledge")}
+              data-testid="agent-knowledge-tab"
+            >
+              <Brain className="w-3 h-3 inline mr-1" />Knowledge
+              {knowledgeItems.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-purple-500/30 text-purple-300 rounded-full">{knowledgeItems.length}</span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {activeTab === "chat" ? (
+          <>
+            {/* Messages */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4" style={{ overscrollBehavior: 'contain' }}>
+              <div className="space-y-4">
+                {messages.map((msg, idx) => (
+                  <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[80%] p-3 rounded-lg ${
+                      msg.role === "user"
+                        ? "bg-cyan-500/20 text-cyan-100"
+                        : "bg-white/5 text-white/90"
+                    }`}>
+                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white/5 p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+                        <span className="text-sm text-white/50">{agent.name} is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Chat Input */}
+            <div className="p-4 border-t border-white/10">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => onInputChange(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && onSend()}
+                  placeholder={`Message ${agent.name}...`}
+                  className="flex-1 bg-white/5 border-white/10"
+                  disabled={loading}
+                  data-testid="agent-chat-input"
+                />
+                <Button
+                  onClick={onSend}
+                  disabled={loading || !input.trim()}
+                  className="bg-cyan-500 hover:bg-cyan-600"
+                  data-testid="agent-chat-send"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Knowledge Panel */
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" style={{ overscrollBehavior: 'contain' }}>
+            {/* Add knowledge form */}
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10 space-y-3">
+              <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                <Plus className="w-4 h-4 text-purple-400" />Add Knowledge Resource
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {(["url", "api", "file", "ml_note"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setKnowledgeType(t)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-colors border ${knowledgeType === t ? "border-purple-500/50 bg-purple-500/15 text-purple-300" : "border-white/10 bg-white/5 text-white/50 hover:text-white/70"}`}
+                  >
+                    {typeIcon[t]}{typeLabel[t]}
+                  </button>
+                ))}
+              </div>
+              <Input
+                placeholder="Display name (e.g. 'Protocol Reference Doc')"
+                value={knowledgeDisplayName}
+                onChange={(e) => setKnowledgeDisplayName(e.target.value)}
+                className="bg-white/5 border-white/10 text-sm"
+              />
+              {knowledgeType === "file" ? (
+                <div className="border border-dashed border-white/20 rounded-lg p-4 text-center">
+                  <input
+                    type="file"
+                    id="knowledge-file-input"
+                    className="hidden"
+                    accept=".pdf,.csv,.txt,.doc,.docx"
+                    onChange={(e) => setKnowledgeFile(e.target.files?.[0] || null)}
+                  />
+                  <label htmlFor="knowledge-file-input" className="cursor-pointer">
+                    <Upload className="w-6 h-6 text-white/30 mx-auto mb-2" />
+                    {knowledgeFile ? (
+                      <p className="text-sm text-purple-300">{knowledgeFile.name}</p>
+                    ) : (
+                      <p className="text-xs text-white/40">Click to select PDF, CSV, or text file</p>
+                    )}
+                  </label>
+                </div>
+              ) : knowledgeType === "ml_note" ? null : (
+                <Input
+                  placeholder={knowledgeType === "api" ? "https://api.example.com/endpoint" : "https://reference-url.com"}
+                  value={knowledgeUrl}
+                  onChange={(e) => setKnowledgeUrl(e.target.value)}
+                  className="bg-white/5 border-white/10 text-sm"
+                />
+              )}
+              <Textarea
+                placeholder={knowledgeType === "ml_note" ? "Describe the ML capability, model reference, or capability note for this agent..." : "Optional notes or additional context"}
+                value={knowledgeNotes}
+                onChange={(e) => setKnowledgeNotes(e.target.value)}
+                className="bg-white/5 border-white/10 text-sm"
+              />
+              <Button
+                onClick={handleAddKnowledge}
+                disabled={knowledgeUploading}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm"
+                data-testid="add-knowledge-btn"
+              >
+                {knowledgeUploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin mr-2" />Uploading...</>
+                ) : (
+                  <><Plus className="w-4 h-4 mr-2" />Add to {agent.name}</>
+                )}
+              </Button>
+            </div>
+
+            {/* Knowledge items list */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+                {knowledgeItems.length} Knowledge Item{knowledgeItems.length !== 1 ? "s" : ""}
+              </h3>
+              {knowledgeItems.length === 0 ? (
+                <div className="text-center py-8 text-white/30 text-sm">
+                  <Brain className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  No knowledge resources yet. Add files, URLs, or API endpoints above.
+                </div>
+              ) : (
+                knowledgeItems.map((item) => (
+                  <div key={item.id} className="flex items-start gap-3 bg-white/5 rounded-lg p-3 border border-white/10 group">
+                    <div className="mt-0.5">{typeIcon[item.knowledgeType] || <FileText className="w-4 h-4 text-white/40" />}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-medium text-white/80">{item.displayName}</p>
+                        {item.status && item.status !== "active" && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                            item.status === "processing" ? "bg-yellow-500/20 text-yellow-400" :
+                            item.status === "error" ? "bg-red-500/20 text-red-400" :
+                            "bg-green-500/20 text-green-400"
+                          }`}>{item.status}</span>
+                        )}
+                        {item.status === "active" && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400 font-medium">active</span>
+                        )}
+                      </div>
+                      {item.referencePath && (
+                        <a
+                          href={item.referencePath}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-cyan-400/70 hover:text-cyan-400 truncate block"
+                        >
+                          {item.referencePath}
+                        </a>
+                      )}
+                      <p className="text-[10px] text-white/30 mt-0.5">{typeLabel[item.knowledgeType]}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-red-400/70 hover:text-red-400 hover:bg-red-500/10"
+                      onClick={() => handleDeleteKnowledge(item.id, item.displayName)}
+                      data-testid={`delete-knowledge-${item.id}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }
