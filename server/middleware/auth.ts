@@ -50,6 +50,15 @@ async function validateApiKey(req: Request): Promise<{ valid: boolean; keyId?: s
   }
 
   const rawKey = authHeader.substring(7);
+  
+  // DIRECT ENV FALLBACK: For Replit deployments where the DB hasn't synced the hash
+  if (process.env.VITE_ALLIO_API_KEY && rawKey === process.env.VITE_ALLIO_API_KEY) {
+    return { valid: true, permissions: ['read', 'write', 'admin'] };
+  }
+  if (process.env.ALLIO_API_KEY && rawKey === process.env.ALLIO_API_KEY) {
+    return { valid: true, permissions: ['read', 'write', 'admin'] };
+  }
+
   const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
 
   try {
