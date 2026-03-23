@@ -2990,6 +2990,11 @@ Only flag significant formations. If the frame is relatively clear, return empty
         role = 'doctor';
       }
 
+      // 911 Hotfix: Override role for Blake to lock down Trustee dashboard
+      if (userRecord?.email === 'blake@forgottenformula.com' || userRecord?.wpUsername === 'blake') {
+        role = 'trustee';
+      }
+
       res.json({
         id: null,
         userId,

@@ -150,15 +150,6 @@ export default function WPLoginPage() {
           <Separator className="my-4" />
 
           <div className="flex flex-col gap-3">
-            <Button
-              variant="outline"
-              className="w-full border-teal-600/30 text-teal-400 hover:bg-teal-600/10"
-              onClick={handlePreviewMode}
-              data-testid="button-trustee-preview"
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              Enter as Trustee (Preview Mode)
-            </Button>
 
             <Button
               variant="ghost"

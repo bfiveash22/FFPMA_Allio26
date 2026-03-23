@@ -413,7 +413,7 @@ function Router() {
         </ProtectedRoute>
       )} />
       <Route path="/video-studio" component={() => (
-        <RoleProtectedRoute allowedRoles={["admin", "trustee"]}>
+        <RoleProtectedRoute allowedRoles={["trustee"]}>
           <AppLayout>
             <VideoStudioPage />
           </AppLayout>
@@ -544,12 +544,12 @@ function Router() {
         </ProtectedRoute>
       )} />
       <Route path="/trustee" component={() => (
-        <RoleProtectedRoute allowedRoles={["admin", "trustee"]}>
+        <RoleProtectedRoute allowedRoles={["trustee"]}>
           <TrusteeDashboard />
         </RoleProtectedRoute>
       )} />
       <Route path="/trustee/contract-review" component={() => (
-        <RoleProtectedRoute allowedRoles={["admin", "trustee"]}>
+        <RoleProtectedRoute allowedRoles={["trustee"]}>
           <AppLayout>
             <ContractReviewPage />
           </AppLayout>
