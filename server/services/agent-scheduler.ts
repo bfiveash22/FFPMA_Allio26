@@ -147,11 +147,6 @@ async function determineCheckInterval(): Promise<number> {
 }
 
 async function checkAndExecuteTasks(): Promise<void> {
-  if (activeExecutions >= MAX_CONCURRENT_TASKS) {
-    log(`[Scheduler] At max capacity (${activeExecutions}/${MAX_CONCURRENT_TASKS}). Waiting...`, 'agent-scheduler');
-    return;
-  }
-
   status.lastCheck = new Date();
 
   try {
@@ -163,25 +158,17 @@ async function checkAndExecuteTasks(): Promise<void> {
     const LONG_RUNNING_KEYWORDS = ['video', 'audio', 'render', 'presentation', 'compilation', 'export', 'urgent'];
     const now = Date.now();
     const stuckTasks = allTasks.filter(t => {
-      // Consider both 'in_progress' and 'blocked' as potentially stuck
       if (t.status !== 'in_progress' && t.status !== 'blocked') return false;
       
       const updatedAt = t.updatedAt ? new Date(t.updatedAt).getTime() : 0;
       if ((now - updatedAt) <= STUCK_THRESHOLD_MS) return false;
       
-      // If task is at 100% but still in_progress, IT IS STUCK and should be reset
       if (t.status === 'in_progress' && (t.progress || 0) >= 100) return true;
-      
-      // For blocked tasks, just reset them if they exceed the threshold
       if (t.status === 'blocked') return true;
       
-      // Exclude legitimately long-running tasks for normal in_progress check
       const titleLower = (t.title || '').toLowerCase();
       const isLongRunning = LONG_RUNNING_KEYWORDS.some(kw => titleLower.includes(kw));
-      if (isLongRunning && (t.progress || 0) > 0) {
-        // Only exclude if they've made some progress (not completely stuck at 0)
-        return false;
-      }
+      if (isLongRunning && (t.progress || 0) > 0) return false;
       
       return true;
     });
@@ -199,7 +186,12 @@ async function checkAndExecuteTasks(): Promise<void> {
     if (stuckTasks.length > 0) {
       log(`[SENTINEL] Reset ${stuckTasks.length} stuck tasks`, 'agent-scheduler');
     }
-    
+
+    if (activeExecutions >= MAX_CONCURRENT_TASKS) {
+      log(`[Scheduler] At max capacity (${activeExecutions}/${MAX_CONCURRENT_TASKS}). Waiting...`, 'agent-scheduler');
+      return;
+    }
+
     const eligibleTasks = allTasks.filter(t => {
       // Skip tasks locked for immediate resume (prevents double-dispatch)
       if (lockedForImmediateResume.has(t.id)) return false;
@@ -232,16 +224,24 @@ async function checkAndExecuteTasks(): Promise<void> {
 
       log(`[SENTINEL] Dispatching: ${task.agentId.toUpperCase()} → "${task.title}"`, 'agent-scheduler');
 
-      executeAgentTask(task.id)
+      // Create a 30-minute timeout promise to prevent permanent memory deadlocks
+      const timeoutPromise = new Promise<any>((_, reject) => {
+        setTimeout(() => reject(new Error('Agent execution timed out after 30 minutes')), 30 * 60 * 1000);
+      });
+
+      Promise.race([
+        executeAgentTask(task.id),
+        timeoutPromise
+      ])
         .then(async result => {
-          if (result.success) {
+          if (result && result.success) {
             status.tasksProcessed++;
             log(`[SENTINEL] ✓ Task completed: ${task.title}`, 'agent-scheduler');
             
             await handleTaskCompletion(task, result);
           } else {
             status.tasksFailed++;
-            log(`[SENTINEL] ✗ Task failed: ${task.title} - ${result.error}`, 'agent-scheduler');
+            log(`[SENTINEL] ✗ Task failed: ${task.title} - ${result ? result.error : 'Unknown'}`, 'agent-scheduler');
           }
         })
         .catch(error => {
