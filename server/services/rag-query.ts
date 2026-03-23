@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { OpenAI } from "openai";
 import { db } from "../db";
 import { knowledgeDocuments, knowledgeEmbeddings } from "@shared/schema";

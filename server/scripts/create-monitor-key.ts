@@ -6,7 +6,7 @@ async function main() {
   try {
     // Generate raw key
     const rawKey = crypto.randomBytes(32).toString('hex');
-    const fullKey = \`allio_\${rawKey}\`;
+    const fullKey = `allio_${rawKey}`;
     
     // Create hash
     const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');

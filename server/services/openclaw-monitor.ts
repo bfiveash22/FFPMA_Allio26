@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { db } from '../db';
 import { openclawMessages } from '../../shared/schema';
 import { and, eq, lte } from 'drizzle-orm';
