@@ -108,13 +108,20 @@ export function auditLog() {
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const r = req as any;
+  
+  // 1. Session check
   const isAuth = r.isAuthenticated ? r.isAuthenticated() : false;
   const hasSub = !!r.user?.claims?.sub;
-
   if (isAuth && hasSub) {
     return next();
   }
 
+  // 2. Monitoring / Preview token check
+  if (isValidPreviewMode(req)) {
+    return next();
+  }
+
+  // 3. API Key check
   const apiResult = await validateApiKey(req);
   if (apiResult.valid) {
     r.apiKeyId = apiResult.keyId;

@@ -60,6 +60,8 @@ import { Link } from "wouter";
 import { agents, getAgentsByDivision } from "@shared/agents";
 import { BloodAnalysisUpload } from "@/components/BloodAnalysisUpload";
 import { MicroscopeLiveAnalyzer } from "@/components/MicroscopeLiveAnalyzer";
+import { SkinAnalyzer } from "@/components/SkinAnalyzer";
+import { RadiologyAnalyzer } from "@/components/RadiologyAnalyzer";
 
 interface DoctorReferralInfo {
   doctorCode: string | null;
@@ -802,69 +804,45 @@ export default function DoctorsPortal() {
                 </div>
               </Card>
 
-              <div className="mb-6">
-                <MicroscopeLiveAnalyzer />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <BloodAnalysisUpload 
-                  onUploadComplete={(result) => {
-                    toast({
-                      title: "Upload Complete",
-                      description: "Blood sample ready for AI analysis",
-                    });
-                  }}
-                />
-
-                {/* Medical Imaging Analysis */}
-                <Card className="bg-black/20 border-white/10 p-6">
-                  <h3 className="font-bold flex items-center gap-2 mb-4">
-                    <Waves className="w-5 h-5 text-violet-400" />
-                    Medical Imaging Analysis
-                  </h3>
-                  <p className="text-sm text-white/60 mb-4">AI-powered analysis for educational pattern recognition</p>
-                  
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                            <Dna className="w-5 h-5 text-violet-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium">X-Ray Pattern Analysis</p>
-                            <p className="text-xs text-white/50">Chest & skeletal imaging</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-amber-500/20 text-amber-300">Coming Soon</Badge>
-                      </div>
-                      <Button className="w-full bg-violet-500/20 hover:bg-violet-500/30 text-violet-300" disabled>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload X-Ray Image
-                      </Button>
-                    </div>
-
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-rose-500/10 to-pink-500/10 border border-rose-500/20">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
-                            <Heart className="w-5 h-5 text-rose-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium">Skin Condition Analysis</p>
-                            <p className="text-xs text-white/50">Dermatological patterns</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-amber-500/20 text-amber-300">Coming Soon</Badge>
-                      </div>
-                      <Button className="w-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300" disabled>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Upload Skin Image
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </div>
+              <Tabs defaultValue="microscope" className="space-y-6">
+                <TabsList className="bg-black/40 border border-white/10 p-1 flex-wrap">
+                  <TabsTrigger value="microscope" className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-300">
+                    <Microscope className="w-4 h-4 mr-2" /> Live Blood
+                  </TabsTrigger>
+                  <TabsTrigger value="dermatology" className="data-[state=active]:bg-rose-500/20 data-[state=active]:text-rose-300">
+                    <Heart className="w-4 h-4 mr-2" /> Dermatology
+                  </TabsTrigger>
+                  <TabsTrigger value="radiology" className="data-[state=active]:bg-teal-500/20 data-[state=active]:text-teal-300">
+                    <Waves className="w-4 h-4 mr-2" /> Radiology
+                  </TabsTrigger>
+                  <TabsTrigger value="general" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-300">
+                    <Upload className="w-4 h-4 mr-2" /> General Upload
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="microscope" className="mt-0">
+                  <MicroscopeLiveAnalyzer />
+                </TabsContent>
+                
+                <TabsContent value="dermatology" className="mt-0">
+                  <SkinAnalyzer />
+                </TabsContent>
+                
+                <TabsContent value="radiology" className="mt-0">
+                  <RadiologyAnalyzer />
+                </TabsContent>
+                
+                <TabsContent value="general" className="mt-0 grid grid-cols-1 xl:grid-cols-2">
+                  <BloodAnalysisUpload 
+                    onUploadComplete={(result) => {
+                      toast({
+                        title: "Upload Complete",
+                        description: "Blood sample ready for AI analysis",
+                      });
+                    }}
+                  />
+                </TabsContent>
+              </Tabs>
 
               {/* Analysis Queue */}
               <Card className="bg-black/20 border-white/10 p-6">
