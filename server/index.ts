@@ -6,6 +6,8 @@ import path from "path";
 import { startScheduler, stopScheduler } from "./services/scheduler";
 import { startAgentScheduler, stopAgentScheduler, seedInitialTasks } from "./services/agent-scheduler";
 import { startOpenClawMonitor } from "./services/openclaw-monitor";
+import { seedPrograms } from "./seed-programs";
+import { seedIVTraining } from "./seeds/iv-training-seed";
 
 const app = express();
 const httpServer = createServer(app);
@@ -126,6 +128,18 @@ app.use((req, res, next) => {
           log(`Seeded ${result.created} initial agent tasks`, 'startup');
         }
         startAgentScheduler();
+      });
+
+      seedPrograms().then(() => {
+        log('Validated FFPMA premium clinical programs database', 'startup');
+      }).catch(err => {
+        log(`Failed to seed programs: ${err.message}`, 'error');
+      });
+
+      seedIVTraining().then(() => {
+        log('Validated FFPMA IV Therapy Certification module', 'startup');
+      }).catch(err => {
+        log(`Failed to seed IV training: ${err.message}`, 'error');
       });
     },
   );
