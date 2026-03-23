@@ -1,18 +1,10 @@
 import { db } from "./db";
 import { programs } from "@shared/schema";
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 export async function seedPrograms() {
   try {
-    // Check if programs exist
-    const [{ value }] = await db.select({ value: count() }).from(programs);
-    
-    if (value > 0) {
-      console.log(`[Seed] Programs table already has ${value} records. Skipping seed.`);
-      return;
-    }
-
-    console.log("[Seed] Seeding 12 premium clinical programs...");
+    console.log("[Seed] Seeding premium clinical programs...");
 
     const seedData = [
       // IV PROGRAMS
@@ -106,6 +98,17 @@ export async function seedPrograms() {
         duration: "4-6 Weeks",
         isActive: true,
       },
+      {
+        name: "MitoStac Cellular Rejuvenation",
+        slug: "mitostac-cellular-rejuvenation",
+        type: "peptide" as const,
+        shortDescription: "A powerful combination of mitochondrial optimization peptides to rapidly restore ATP and cellular energy.",
+        description: "MitoStac is the premier mitochondrial optimization protocol designed to rapidly restore ATP production and reverse deep cellular exhaustion. Featuring a highly synergistic master blend of performance and longevity peptides including MOTS-c and SS-31, MitoStac directly targets the exact metabolic pathways responsible for chronic fatigue, cognitive decline, and metabolic resistance—forcing a profound biological reset.",
+        imageUrl: "https://images.unsplash.com/photo-1559757175-7b21e0ed3a23",
+        price: "450.00",
+        duration: "4-6 Weeks",
+        isActive: true,
+      },
 
       // PROTOCOL PROGRAMS
       {
@@ -154,8 +157,19 @@ export async function seedPrograms() {
       }
     ];
 
-    await db.insert(programs).values(seedData);
-    console.log("[Seed] Successfully seeded 12 premium clinical programs.");
+    let insertedCount = 0;
+    for (const program of seedData) {
+      const [{ exists }] = await db.select({ exists: count() })
+        .from(programs)
+        .where(eq(programs.slug, program.slug));
+        
+      if (exists === 0) {
+        await db.insert(programs).values(program);
+        insertedCount++;
+        console.log(`[Seed] Inserted missing program: ${program.name}`);
+      }
+    }
+    console.log(`[Seed] Evaluated ${seedData.length} programs, safely injected ${insertedCount} new additions.`);
   } catch (error) {
     console.error("[Seed] ERROR while seeding programs:", error);
   }
