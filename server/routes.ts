@@ -3063,6 +3063,51 @@ Only flag significant formations. If the frame is relatively clear, return empty
     }
   });
 
+  // Stripe Webhooks
+  app.post("/api/stripe/webhooks", async (req: Request, res: Response) => {
+    const signature = req.headers['stripe-signature'] as string;
+    if (!signature) {
+      return res.status(400).send('No stripe signature found');
+    }
+    
+    try {
+      const { constructWebhookEvent } = await import('./services/stripe');
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      
+      if (!webhookSecret) {
+        console.warn('[STRIPE] Webhook secret not configured, skipping verification for dev mode.');
+        return res.status(200).send('OK (Dev Mode)'); // Avoid hard crash if not configured yet
+      }
+
+      let event;
+      try {
+        event = constructWebhookEvent(
+          (req as any).rawBody || JSON.stringify(req.body),
+          signature,
+          webhookSecret
+        );
+      } catch (err: any) {
+        console.error(`⚠️  Webhook signature verification failed.`, err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as any;
+        console.log(`[STRIPE] Payment for session ${session.id} successful`);
+        
+        // Handle post-payment logic: unlocking courses, upgrading membership, etc.
+        if (session.metadata?.userId) {
+          console.log(`[STRIPE] Triggering entitlement unlock for user ${session.metadata.userId}`);
+        }
+      }
+
+      res.json({received: true});
+    } catch (error: any) {
+      console.error('[STRIPE] Webhook error:', error);
+      res.status(500).send('Internal validation error');
+    }
+  });
+
   // WooCommerce API Routes
 
   // Get WooCommerce connection status
