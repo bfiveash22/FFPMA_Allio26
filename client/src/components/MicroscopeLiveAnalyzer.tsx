@@ -70,7 +70,16 @@ export function MicroscopeLiveAnalyzer() {
   const startStream = async () => {
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
-        video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : true,
+        video: selectedDeviceId ? { 
+          deviceId: { exact: selectedDeviceId },
+          width: { ideal: 3840 },
+          height: { ideal: 2160 },
+          frameRate: { ideal: 30 }
+        } : {
+          width: { ideal: 3840 },
+          height: { ideal: 2160 },
+          frameRate: { ideal: 30 }
+        },
         audio: false
       });
       setStream(newStream);
