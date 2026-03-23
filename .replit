@@ -6,10 +6,6 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 channel = "stable-24_05"
 packages = ["ffmpeg", "freetype", "glibcLocales", "jq"]
 
-[[ports]]
-localPort = 5000
-externalPort = 80
-
 [env]
 PORT = "5000"
 
@@ -66,3 +62,27 @@ WP_USERNAME = "blake"
 STAGING_WC_URL = "https://wordpress-1347597-6126502.cloudwaysapps.com"
 STAGING_WP_SITE_URL = "https://wordpress-1347597-6126502.cloudwaysapps.com"
 USE_STAGING = "false"
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 18352
+externalPort = 80
+
+[[ports]]
+localPort = 19237
+externalPort = 3002
+
+[[ports]]
+localPort = 22375
+externalPort = 3003
+
+[[ports]]
+localPort = 22608
+externalPort = 3000
