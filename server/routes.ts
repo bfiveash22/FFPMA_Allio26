@@ -5036,9 +5036,15 @@ Only flag significant formations. If the frame is relatively clear, return empty
       }
 
       res.json(progress);
+      res.json(progress);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
+  });
+
+  // Public Health Checks
+  app.get(['/health', '/api/health'], (req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString(), environment: process.env.NODE_ENV });
   });
 
   // AI Tutor for training modules
