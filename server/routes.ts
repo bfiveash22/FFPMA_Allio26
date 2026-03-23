@@ -3394,6 +3394,59 @@ Only flag significant formations. If the frame is relatively clear, return empty
     }
   });
 
+  // SignNow Webhook for Document Updates (Event Subscription)
+  app.post("/api/signnow/webhook", async (req: Request, res: Response) => {
+    try {
+      const event = req.body;
+      console.log(`[SIGNNOW] Webhook event received:`, event?.meta?.event || event?.event);
+
+      const eventType = event?.meta?.event || event?.event;
+      if (eventType === 'document.update' || eventType === 'document.complete') {
+        const documentId = event?.content?.id || event?.document_id;
+        
+        if (documentId) {
+          const { contracts } = await import('@shared/schema');
+          const contractsResult = await db.select().from(contracts).where(eq(contracts.signNowDocumentId, documentId));
+          const contract = contractsResult[0];
+
+          if (contract && contract.status !== 'signed' && contract.status !== 'completed') {
+            await storage.updateContract(contract.id, { 
+              status: 'signed',
+              signedAt: new Date()
+            });
+            console.log(`[SIGNNOW] Contract ${contract.id} marked as signed.`);
+
+            try {
+              const { findAllioFolder, createAllioFolder, findFolderByName, uploadFileFromPath } = await import('./services/drive');
+              const buffer = await signNowService.downloadDocument(documentId);
+              
+              const path = await import('path');
+              const fs = await import('fs');
+              const tempPath = path.join(process.cwd(), `temp_contract_${contract.id}.pdf`);
+              fs.writeFileSync(tempPath, buffer);
+
+              let allioFolder = await findAllioFolder();
+              if (!allioFolder) allioFolder = await createAllioFolder();
+              
+              const legalFolderId = await findFolderByName(allioFolder.id, 'Legal - Contracts & Agreements');
+              if (legalFolderId) {
+                 await uploadFileFromPath(legalFolderId, tempPath, `Completed_Contract_${contract.doctorName || contract.userId}.pdf`);
+                 console.log(`[SIGNNOW] Contract uploaded to Google Drive for ${contract.id}`);
+              }
+              fs.unlinkSync(tempPath);
+            } catch (uploadErr) {
+              console.error("[SIGNNOW] Drive upload error:", uploadErr);
+            }
+          }
+        }
+      }
+      res.status(200).send('OK');
+    } catch (error: any) {
+      console.error('[SIGNNOW] Webhook processing error:', error);
+      res.status(500).send('Error processing webhook');
+    }
+  });
+
   // Update contract status - accessible by contract ID for signing completion webhook
   app.patch("/api/contracts/:id", requireRole("admin"), async (req: Request, res: Response) => {
     try {
