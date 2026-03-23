@@ -64,6 +64,10 @@ STAGING_WP_SITE_URL = "https://wordpress-1347597-6126502.cloudwaysapps.com"
 USE_STAGING = "false"
 
 [[ports]]
+localPort = 5000
+externalPort = 5000
+
+[[ports]]
 localPort = 5173
 externalPort = 5173
 
