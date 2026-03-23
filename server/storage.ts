@@ -238,6 +238,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAgentTask(task: InsertAgentTask): Promise<AgentTask> {
+    // Global deduplication guard
+    const existingTasks = await db.select().from(agentTasks).where(
+      and(
+        eq(agentTasks.agentId, task.agentId),
+        eq(agentTasks.title, task.title),
+        inArray(agentTasks.status, ['pending', 'in_progress'])
+      )
+    );
+
+    if (existingTasks.length > 0) {
+      if (task.parentTaskId) {
+        const exactMatch = existingTasks.find(t => t.parentTaskId === task.parentTaskId);
+        if (exactMatch) {
+          console.log(`[STORAGE] Global Dedup Guard: Caught duplicate task for ${task.agentId}: "${task.title}"`);
+          return exactMatch;
+        }
+      } else {
+        const exactMatch = existingTasks.find(t => !t.parentTaskId);
+        if (exactMatch) {
+          console.log(`[STORAGE] Global Dedup Guard: Caught duplicate task for ${task.agentId}: "${task.title}"`);
+          return exactMatch;
+        }
+      }
+    }
+
     const [newTask] = await db.insert(agentTasks).values(task).returning();
     return newTask;
   }

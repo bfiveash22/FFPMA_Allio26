@@ -5,6 +5,7 @@ import { agents } from '@shared/agents';
 import { AGENT_DIVISIONS, Division, sentinel } from './sentinel';
 import { hippocratesSearch, paracelsusSearch, helixSearch, oracleSearch } from './research-apis';
 import OpenAI from 'openai';
+import { storage } from '../storage';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -134,9 +135,9 @@ export class SentinelOrchestrator {
       throw new Error(`Agent ${params.agentId} not found in registry`);
     }
 
-    const [task] = await db.insert(agentTasks).values({
+    const task = await storage.createAgentTask({
       agentId: params.agentId.toUpperCase(),
-      division: agent.division,
+      division: agent.division as any,
       title: params.title,
       description: params.description,
       status: 'pending',
@@ -147,7 +148,7 @@ export class SentinelOrchestrator {
       dueDate: params.dueDate,
       crossDivisionFrom: params.crossDivisionFrom,
       crossDivisionTo: params.crossDivisionTo,
-    }).returning();
+    });
 
     await db.update(agentRegistry)
       .set({ 
