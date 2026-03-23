@@ -1,4 +1,5 @@
 import { HfInference } from "@huggingface/inference";
+import OpenAI from "openai";
 
 const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
@@ -232,39 +233,60 @@ export async function checkAgentStatus(): Promise<{
   fallbackModel: string;
   status: string;
 }> {
+  let openaiAvailable = false;
   let primaryAvailable = false;
   let fallbackAvailable = false;
+  
+  let primaryModelName = "gpt-4o";
 
   try {
-    await hf.textGeneration({
-      model: KIMI_K2_MODEL,
-      inputs: "Hello",
-      parameters: { max_new_tokens: 5 }
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    // Fast ping to verify API connectivity
+    await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: "ping" }],
+      max_tokens: 1
     });
-    primaryAvailable = true;
-  } catch (e) {
-    console.log('[HF Agent] Kimi K2 not available');
+    openaiAvailable = true;
+  } catch (e: any) {
+    console.error('[Agent Status] OpenAI check failed:', e.message);
   }
 
-  try {
-    await hf.textGeneration({
-      model: FALLBACK_AGENT_MODEL,
-      inputs: "Hello",
-      parameters: { max_new_tokens: 5 }
-    });
-    fallbackAvailable = true;
-  } catch (e) {
-    console.log('[HF Agent] Fallback agent not available');
+  if (!openaiAvailable) {
+    primaryModelName = KIMI_K2_MODEL;
+    try {
+      await hf.textGeneration({
+        model: KIMI_K2_MODEL,
+        inputs: "Hello",
+        parameters: { max_new_tokens: 5 }
+      });
+      primaryAvailable = true;
+    } catch (e) {
+      console.log('[HF Agent] Kimi K2 not available');
+    }
+
+    try {
+      await hf.textGeneration({
+        model: FALLBACK_AGENT_MODEL,
+        inputs: "Hello",
+        parameters: { max_new_tokens: 5 }
+      });
+      fallbackAvailable = true;
+    } catch (e) {
+      console.log('[HF Agent] Fallback agent not available');
+    }
   }
 
   return {
-    available: primaryAvailable || fallbackAvailable,
-    primaryModel: KIMI_K2_MODEL,
+    available: openaiAvailable || primaryAvailable || fallbackAvailable,
+    primaryModel: primaryModelName,
     fallbackModel: FALLBACK_AGENT_MODEL,
-    status: primaryAvailable 
-      ? 'Agent system online (Kimi K2)'
-      : fallbackAvailable 
-        ? 'Agent system online (Mistral fallback)'
-        : 'Agent system offline'
+    status: openaiAvailable
+      ? 'Agent system online (OpenAI GPT-4o)'
+      : primaryAvailable 
+        ? 'Agent system online (Kimi K2)'
+        : fallbackAvailable 
+          ? 'Agent system online (Mistral fallback)'
+          : 'Agent system offline'
   };
 }
