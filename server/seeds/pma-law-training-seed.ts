@@ -354,12 +354,18 @@ export async function seedPMALawTraining() {
     console.log(`[Seed] Added ${pmaLawKnowledgeEntries.length} knowledge base entries`);
     
     // 5. Create Legal agent task
-    await db.insert(agentTasks).values(pmaLegalAgentTask).onConflictDoNothing();
-    console.log("[Seed] Created Legal division task for GAVEL");
+    const existingLegalTasks = await db.select().from(agentTasks).where(sql`title = ${pmaLegalAgentTask.title}`).limit(1);
+    if (existingLegalTasks.length === 0) {
+      await db.insert(agentTasks).values(pmaLegalAgentTask);
+      console.log("[Seed] Created Legal division task for GAVEL");
+    }
     
     // 6. Create Marketing agent task
-    await db.insert(agentTasks).values(pmaMarketingAgentTask).onConflictDoNothing();
-    console.log("[Seed] Created Marketing division task for MUSE");
+    const existingMarketingTasks = await db.select().from(agentTasks).where(sql`title = ${pmaMarketingAgentTask.title}`).limit(1);
+    if (existingMarketingTasks.length === 0) {
+      await db.insert(agentTasks).values(pmaMarketingAgentTask);
+      console.log("[Seed] Created Marketing division task for MUSE");
+    }
     
     return {
       success: true,
