@@ -711,6 +711,17 @@ export const chatMessages = pgTable("chat_messages", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// OpenClaw Message Bridge
+export const openclawMessages = pgTable("openclaw_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(),
+  message: text("message").notNull(),
+  priority: varchar("priority").default("normal"),
+  status: varchar("status").default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const clinicsRelations = relations(clinics, ({ many }) => ({
   members: many(memberProfiles),
@@ -1182,7 +1193,6 @@ export const dianeKnowledge = pgTable("diane_knowledge", {
 });
 
 export const insertDianeKnowledgeSchema = createInsertSchema(dianeKnowledge).omit({
-  id: true,
   createdAt: true,
   updatedAt: true,
 });

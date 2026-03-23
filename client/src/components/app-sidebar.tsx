@@ -24,7 +24,7 @@ import {
   Dna,
   Scale,
 } from "lucide-react";
-import ffPmaLogo from "@assets/ff_pma_logo.png";
+import ffPmaLogo from "@/assets/ff_pma_logo.png";
 import {
   Sidebar,
   SidebarContent,

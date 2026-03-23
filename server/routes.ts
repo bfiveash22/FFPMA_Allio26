@@ -2057,6 +2057,115 @@ INSTRUCTIONS:
     }
   });
 
+  // ====== Real-Time Autonomous Vision Processing ======
+  app.post("/api/blood-analysis/live-analyze", requireRole("admin"), async (req: Request, res: Response) => {
+    try {
+      const { imageBase64 } = req.body;
+      if (!imageBase64) {
+        return res.status(400).json({ success: false, error: "No image data provided" });
+      }
+
+      console.log("[Blood Analysis] Running rapid Live Frame AI analysis...");
+      
+      // Remove data URI prefix if present
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+      
+      const openaiResult = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are FFPMA's elite AI Darkfield/Phase Contrast microscopy specialist. 
+Your goal is to rapidly scan the incoming live-video frame for critical holistic blood markers.
+
+You MUST respond strictly with a valid JSON object matching this schema:
+{
+  "boxes": [
+    {
+      "id": "unique-id",
+      "x": number (0-100 percentage from left),
+      "y": number (0-100 percentage from top),
+      "width": number (0-100 percentage relative to frame width),
+      "height": number (0-100 percentage relative to frame height),
+      "label": "string (e.g., 'Rouleaux', 'Erythrocyte aggregation', 'Candida marker')",
+      "confidence": number (0.0 to 1.0),
+      "color": "string (hex code, e.g., '#8b5cf6' for violet, '#ef4444' for red/danger)"
+    }
+  ],
+  "findings": [
+    "string short description of finding 1",
+    "string short description of finding 2"
+  ]
+}
+
+Only flag significant formations. If the frame is relatively clear, return empty arrays.`
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Analyze this live microscope frame."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64Data}`,
+                  detail: "low" // Keep it low for fast real-time processing
+                }
+              }
+            ]
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 500,
+        temperature: 0.1
+      });
+
+      const aiResponseText = openaiResult.choices[0]?.message?.content || "{}";
+      const parsedData = JSON.parse(aiResponseText);
+
+      res.json({
+        success: true,
+        boxes: parsedData.boxes || [],
+        findings: parsedData.findings || []
+      });
+    } catch (error: any) {
+      console.error("[Blood Analysis] Live AI error:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // ====== Live View Protocol Generation Hook ======
+  app.post("/api/blood-analysis/generate-protocol", requireRole("admin"), async (req: Request, res: Response) => {
+    try {
+      const { findings } = req.body;
+      if (!findings || !Array.isArray(findings)) {
+        return res.status(400).json({ success: false, error: "Missing findings array" });
+      }
+
+      console.log(`[Blood Analysis] Queuing Agent Protocol Task for ${findings.length} findings...`);
+      const { executeAgentTask } = await import("./services/agent-executor");
+      
+      const task = await storage.createAgentTask({
+        title: "Live Blood Analysis Protocol Generation",
+        description: `Generate a clinical protocol presentation for a live blood analysis session. Findings detected: ${findings.join(', ')}. Use your filesystem/presentation tools to build the .pptx.`,
+        agentId: "nexus",  // Medical Science Agent
+        division: "science",
+        priority: "high",
+        status: "pending"
+      });
+
+      // Fire and forget so we don't hold the HTTP request for 30s
+      executeAgentTask(task.id).catch(err => console.error("Agent Task Execution Error:", err));
+
+      res.json({ success: true, taskId: task.id, message: "Protocol generation queued with NEXUS." });
+    } catch (error: any) {
+      console.error("[Blood Analysis] Protocol Generation error:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   app.get("/api/blood-analysis/status", requireRole("admin"), async (req: Request, res: Response) => {
     try {
       const { checkHuggingFaceStatus } = await import("./services/huggingface-blood-analysis");
@@ -4777,6 +4886,32 @@ INSTRUCTIONS:
       if (!progress) {
         return res.status(404).json({ error: "Progress not found" });
       }
+
+      // 🏆 Automate Gamification & Achievements 🏆
+      if (req.params.contentType === 'module') {
+        try {
+          const allProgress = await storage.getUserProgressByType(userId, 'module');
+          const completedCount = allProgress.filter(p => p.status === 'completed').length;
+          const achievements = await storage.getAchievements();
+          
+          let achievementToAward = null;
+          if (completedCount === 1) {
+            achievementToAward = achievements.find(a => a.type === 'module_complete' && (a.criteria as any)?.modulesCompleted === 1);
+          } else if (completedCount === 5) {
+            achievementToAward = achievements.find(a => a.type === 'module_complete' && (a.criteria as any)?.modulesCompleted === 5);
+          } else if (completedCount === 15) {
+            achievementToAward = achievements.find(a => a.type === 'module_complete' && (a.criteria as any)?.modulesCompleted === 15);
+          }
+
+          if (achievementToAward) {
+            await storage.awardAchievement(userId, achievementToAward.id);
+            console.log(`[Gamification] Awarded achievement ${achievementToAward.name} to user ${userId}`);
+          }
+        } catch (err) {
+          console.error("[Gamification] Error evaluating or awarding achievement:", err);
+        }
+      }
+
       res.json(progress);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -6822,7 +6957,7 @@ Status: DRAFT - Pending Trustee Review`,
         return res.status(400).json({ error: 'Missing required field: type' });
       }
 
-      const WRITE_EVENT_TYPES = ['task_complete', 'task_route', 'feedback_loop'];
+      const WRITE_EVENT_TYPES = ['task_complete', 'task_route', 'feedback_loop', 'message_completed'];
       if (WRITE_EVENT_TYPES.includes(type)) {
         if (!key.permissions || !key.permissions.includes('write')) {
           console.warn(`[OPENCLAW WEBHOOK] Key ${key.name} lacks write permission for event type: ${type}`);
@@ -6837,6 +6972,19 @@ Status: DRAFT - Pending Trustee Review`,
         const completed = await orchestrator.completeTask(taskId, outputUrl);
         console.log(`[OPENCLAW WEBHOOK] Task ${taskId} completion: ${completed}`);
         return res.json({ success: true, processed: 'task_complete', taskId, completed });
+      }
+
+      if (type === 'message_completed' && taskId) {
+        const { openclawMessages } = await import('@shared/schema');
+        await db.update(openclawMessages)
+          .set({ 
+             status: status === 'failed' ? 'failed' : 'completed',
+             updatedAt: new Date()
+          })
+          .where(drizzleEq(openclawMessages.id, taskId));
+          
+        console.log(`[OPENCLAW WEBHOOK] Message bridge task ${taskId} marked as ${status || 'completed'}`);
+        return res.json({ success: true, processed: 'message_completed', taskId });
       }
 
       if (type === 'task_route' && agentId && payload) {

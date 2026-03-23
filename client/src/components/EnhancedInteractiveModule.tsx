@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { InteractiveKnowledgeCheck, ProgressGate, type KnowledgeCheckQuestion } from "./InteractiveKnowledgeCheck";
 import { DrMillerNarration } from "./DrMillerNarration";
+import { PracticalAssessmentUpload } from "./PracticalAssessmentUpload";
 
 interface Section {
   title: string;
@@ -271,6 +272,16 @@ export function EnhancedInteractiveModule({
                 ))}
               </ul>
             </div>
+          )}
+
+          {isLastSection && isCurrentCheckPassed && (moduleId.includes("peptide") || moduleId.includes("live-blood") || moduleId.includes("lba")) && (
+            <PracticalAssessmentUpload 
+              moduleId={moduleId}
+              moduleTitle={moduleTitle}
+              onUploadSuccess={() => {
+                // Could perform additional logic or unlock the continue button, but for now just showing it was submitted.
+              }}
+            />
           )}
 
           <div className="flex justify-between pt-4 border-t">

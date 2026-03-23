@@ -5,6 +5,7 @@ import { createServer } from "http";
 import path from "path";
 import { startScheduler, stopScheduler } from "./services/scheduler";
 import { startAgentScheduler, stopAgentScheduler, seedInitialTasks } from "./services/agent-scheduler";
+import { startOpenClawMonitor } from "./services/openclaw-monitor";
 
 const app = express();
 const httpServer = createServer(app);
@@ -116,6 +117,9 @@ app.use((req, res, next) => {
       
       // Start ATHENA's 6-hour report scheduler
       startScheduler();
+      
+      // Start OpenClaw Database Bridge Staleness Monitor
+      startOpenClawMonitor();
       
       seedInitialTasks().then(result => {
         if (result.created > 0) {

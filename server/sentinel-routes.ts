@@ -2,6 +2,7 @@ import { Express, Request, Response } from 'express';
 import { orchestrator } from './services/sentinel-orchestrator';
 import { AGENT_DIVISIONS, Division } from './services/sentinel';
 import { requireRole } from './middleware/auth';
+import { delegateToOpenClaw } from './services/openclaw-delegate';
 
 const adminOnly = requireRole('admin');
 
@@ -189,6 +190,40 @@ export function registerSentinelRoutes(app: Express): void {
         inProgress: isReviewInProgress(),
         available: review !== null
       });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/sentinel/openclaw-delegate', adminOnly, async (req: Request, res: Response) => {
+    try {
+      const { message, target } = req.body;
+      if (!message) {
+        return res.status(400).json({ error: 'message is required' });
+      }
+      const result = await delegateToOpenClaw(message, target);
+      if (result.success) {
+        res.json({ success: true, message: 'Message successfully delegated to OpenClaw', output: result.output });
+      } else {
+        res.status(500).json({ error: 'Failed to delegate to OpenClaw', details: result.output });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/sentinel/openclaw-queue', adminOnly, async (_req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { openclawMessages } = await import('../shared/schema');
+      const { desc } = await import('drizzle-orm');
+      
+      const queue = await db.select()
+        .from(openclawMessages)
+        .orderBy(desc(openclawMessages.createdAt))
+        .limit(50);
+        
+      res.json(queue);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

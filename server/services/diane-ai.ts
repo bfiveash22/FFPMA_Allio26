@@ -237,8 +237,19 @@ export function registerDianeRoutes(app: Express): void {
 
       const UNIVERSAL_MANDATE = `\n\nCORE MANDATE:\nYou are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
 
+      // FETCH GOOGLE DRIVE KNOWLEDGE (NATIVE RAG)
+      let driveContext = "";
+      try {
+        const { getRagContext } = await import("./rag-query");
+        driveContext = await getRagContext(content);
+      } catch(e) {
+        console.error("Failed to fetch Native Drive knowledge:", e);
+      }
+      
+      const FINAL_SYSTEM_PROMPT = DIANE_SYSTEM_PROMPT + UNIVERSAL_MANDATE + driveContext;
+
       const chatMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
-        { role: "system", content: DIANE_SYSTEM_PROMPT + UNIVERSAL_MANDATE },
+        { role: "system", content: FINAL_SYSTEM_PROMPT },
         ...messages.map((m) => ({
           role: m.role as "user" | "assistant",
           content: m.content,
@@ -315,11 +326,22 @@ export function registerDianeRoutes(app: Express): void {
 
       const UNIVERSAL_MANDATE = `\n\nCORE MANDATE:\nYou are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
 
+      // FETCH GOOGLE DRIVE KNOWLEDGE (NATIVE RAG)
+      let driveContext = "";
+      try {
+        const { getRagContext } = await import("./rag-query");
+        driveContext = await getRagContext(message);
+      } catch(e) {
+        console.error("Failed to fetch Native Drive knowledge:", e);
+      }
+      
+      const FINAL_SYSTEM_PROMPT = DIANE_SYSTEM_PROMPT + UNIVERSAL_MANDATE + driveContext;
+
       // Stream response from OpenAI
       const stream = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
-          { role: "system", content: DIANE_SYSTEM_PROMPT + UNIVERSAL_MANDATE },
+          { role: "system", content: FINAL_SYSTEM_PROMPT },
           { role: "user", content: message },
         ],
         stream: true,

@@ -18,6 +18,7 @@ import { agents, getAgentsByDivision } from "@shared/agents";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import allioHeroBanner from "@/assets/allio_hero_banner_landscape.png";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { OpenClawQueue } from "@/components/trustee/OpenClawQueue";
 import {
   Crown,
   Shield,
@@ -1682,6 +1683,10 @@ export default function TrusteeDashboard() {
                 <Gavel className="w-4 h-4 mr-2" />
                 PMA & Contracts
               </TabsTrigger>
+              <TabsTrigger value="openclaw" className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-300" data-testid="tab-openclaw">
+                <Radio className="w-4 h-4 mr-2" />
+                OpenClaw Comms
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="command-center" className="space-y-6">
@@ -2194,6 +2199,10 @@ export default function TrusteeDashboard() {
                   </Card>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="openclaw" className="space-y-6">
+              <OpenClawQueue />
             </TabsContent>
 
             <TabsContent value="athena-inbox" className="space-y-6">

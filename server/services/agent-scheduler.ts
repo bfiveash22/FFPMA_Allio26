@@ -163,12 +163,19 @@ async function checkAndExecuteTasks(): Promise<void> {
     const LONG_RUNNING_KEYWORDS = ['video', 'audio', 'render', 'presentation', 'compilation', 'export', 'urgent'];
     const now = Date.now();
     const stuckTasks = allTasks.filter(t => {
-      if (t.status !== 'in_progress') return false;
+      // Consider both 'in_progress' and 'blocked' as potentially stuck
+      if (t.status !== 'in_progress' && t.status !== 'blocked') return false;
+      
       const updatedAt = t.updatedAt ? new Date(t.updatedAt).getTime() : 0;
       if ((now - updatedAt) <= STUCK_THRESHOLD_MS) return false;
-      if ((t.progress || 0) >= 100) return false;
       
-      // Exclude legitimately long-running tasks
+      // If task is at 100% but still in_progress, IT IS STUCK and should be reset
+      if (t.status === 'in_progress' && (t.progress || 0) >= 100) return true;
+      
+      // For blocked tasks, just reset them if they exceed the threshold
+      if (t.status === 'blocked') return true;
+      
+      // Exclude legitimately long-running tasks for normal in_progress check
       const titleLower = (t.title || '').toLowerCase();
       const isLongRunning = LONG_RUNNING_KEYWORDS.some(kw => titleLower.includes(kw));
       if (isLongRunning && (t.progress || 0) > 0) {
@@ -180,11 +187,12 @@ async function checkAndExecuteTasks(): Promise<void> {
     });
     
     for (const stuckTask of stuckTasks) {
-      log(`[SENTINEL] Resetting stuck task: ${stuckTask.agentId} - "${stuckTask.title}" (stuck for 2+ hours with 0 progress)`, 'agent-scheduler');
+      const reason = stuckTask.status === 'blocked' ? 'was blocked' : 'was stuck in_progress';
+      log(`[SENTINEL] Resetting stuck/blocked task: ${stuckTask.agentId} - "${stuckTask.title}" (${reason} for 2+ hours)`, 'agent-scheduler');
       await storage.updateAgentTask(stuckTask.id, { 
         status: 'pending', 
         progress: 0,
-        description: (stuckTask.description || '') + `\n\n[SENTINEL AUTO-RESET: Task was stuck in_progress for over 2 hours at ${new Date().toISOString()}]`
+        description: (stuckTask.description || '') + `\n\n[SENTINEL AUTO-RESET: Task ${reason} for over 2 hours at ${new Date().toISOString()}]`
       });
     }
     
@@ -564,8 +572,18 @@ async function triggerSystemEvolution(): Promise<void> {
     const allTasks = await storage.getAllAgentTasks();
     const completedTasks = allTasks.filter(t => t.status === 'completed').length;
     
+    // Pick an available Executive agent prioritizing the least busy to prevent bottleneck
+    const execAgents = ['SENTINEL', 'ATHENA', 'HERMES'];
+    const activeTasksCount = execAgents.map(id => ({
+      id,
+      count: allTasks.filter(t => t.agentId.toUpperCase() === id && (t.status === 'pending' || t.status === 'in_progress')).length
+    }));
+    // Sort by count ascending, so we pick the least busy
+    activeTasksCount.sort((a, b) => a.count - b.count);
+    const selectedAgent = activeTasksCount[0].id;
+    
     await storage.createAgentTask({
-      agentId: 'SENTINEL',
+      agentId: selectedAgent,
       division: 'executive',
       title: `Ecosystem Optimization & Evolution Analysis #${Math.floor(Date.now() / 100000)}`,
       description: `AUTONOMOUS EVOLUTION PROTOCOL:
@@ -576,9 +594,9 @@ Generate a comprehensive document detailing the optimization plan and push it to
       priority: 5,
     });
     
-    log('[SENTINEL] Evolution protocol executed: Optimization task generated.', 'agent-scheduler');
+    log(`[${selectedAgent}] Evolution protocol executed: Optimization task generated.`, 'agent-scheduler');
   } catch (error: any) {
-    log(`[SENTINEL] Evolution error: ${error.message}`, 'agent-scheduler');
+    log(`[Evolution] Error: ${error.message}`, 'agent-scheduler');
   }
 }
 

@@ -15,6 +15,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AITutor } from "./AITutor";
 
 export interface KnowledgeCheckQuestion {
   id: string;
@@ -176,6 +177,16 @@ export function InteractiveKnowledgeCheck({
                     </p>
                   </div>
                 </div>
+              </motion.div>
+            )}
+
+            {attempts >= 1 && !isCorrect && !hasSubmitted && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <AITutor contextQuestion={question.question} />
               </motion.div>
             )}
 

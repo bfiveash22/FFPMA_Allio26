@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { 
   BookOpen, 
   Clock, 
@@ -930,6 +931,33 @@ interface ModuleContent {
 export default function TrainingModulePage() {
   const [match, params] = useRoute("/training/:slug");
   const slug = params?.slug;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const completeModuleMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/my/progress/module/${module?.id}/complete`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Module Completed! 🎉",
+        description: "Your progress has been saved. Keep up the great work!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/my/progress"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my/achievements"] }); // Refresh achievements
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to mark module as complete.",
+        variant: "destructive",
+      });
+    }
+  });
 
   const { data: module, isLoading, error } = useQuery<TrainingModule>({
     queryKey: ["/api/training/modules", slug],
@@ -1042,7 +1070,7 @@ export default function TrainingModulePage() {
             knowledgeChecks={getKnowledgeChecksForModule(module.id)}
             instructorName={module.instructorName || "Dr. Miller"}
             instructorTitle={module.instructorTitle || "Medical Director"}
-            onComplete={() => console.log("Module completed with knowledge checks")}
+            onComplete={() => completeModuleMutation.mutate()}
           />
         ) : (
           <InteractiveTrainingPlayer
@@ -1054,7 +1082,7 @@ export default function TrainingModulePage() {
             driveFileId={module.driveFileId}
             sections={content.sections}
             keyPoints={content.keyPoints}
-            onComplete={() => console.log("Module completed")}
+            onComplete={() => completeModuleMutation.mutate()}
           />
         )
       ) : (
@@ -1149,9 +1177,13 @@ export default function TrainingModulePage() {
             Back to Training
           </Link>
         </Button>
-        <Button data-testid="button-mark-complete">
+        <Button 
+          data-testid="button-mark-complete"
+          onClick={() => completeModuleMutation.mutate()}
+          disabled={completeModuleMutation.isPending}
+        >
           <CheckCircle2 className="mr-2 h-4 w-4" />
-          Mark as Complete
+          {completeModuleMutation.isPending ? "Saving..." : "Mark as Complete"}
         </Button>
       </div>
     </div>

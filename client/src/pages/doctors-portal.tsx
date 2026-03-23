@@ -59,6 +59,7 @@ import {
 import { Link } from "wouter";
 import { agents, getAgentsByDivision } from "@shared/agents";
 import { BloodAnalysisUpload } from "@/components/BloodAnalysisUpload";
+import { MicroscopeLiveAnalyzer } from "@/components/MicroscopeLiveAnalyzer";
 
 interface DoctorReferralInfo {
   doctorCode: string | null;
@@ -278,6 +279,9 @@ export default function DoctorsPortal() {
   const enrolledMembers = membersData?.members || [];
   const completedMembers = enrolledMembers.filter(m => m.status === 'completed').length;
   const pendingMembers = enrolledMembers.filter(m => m.status !== 'completed' && m.status !== 'cancelled').length;
+
+  const hasAnalysisAccess = certifications.some((c: Certification) => c.referenceId === "lba-certification" && c.status === "passed");
+  const hasProtocolsAccess = certifications.some((c: Certification) => c.referenceId === "protocols-certification" && c.status === "passed");
 
   const doctorStats = [
     { label: "Enrolled Members", value: String(enrolledMembers.length), icon: Users, iconBg: "bg-cyan-500/20", iconColor: "text-cyan-400" },
@@ -768,6 +772,21 @@ export default function DoctorsPortal() {
             </TabsContent>
 
             <TabsContent value="analysis" className="space-y-6">
+              {!hasAnalysisAccess ? (
+                <Card className="bg-black/20 border-white/10 p-12 text-center">
+                  <div className="w-20 h-20 rounded-full bg-rose-500/20 flex items-center justify-center mx-auto mb-6">
+                    <Shield className="w-10 h-10 text-rose-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">Certification Required</h3>
+                  <p className="text-white/60 max-w-lg mx-auto mb-8">
+                    To access the AI Microscope and Live Blood Analysis tools, you must first complete the Live Blood Analysis Certification.
+                  </p>
+                  <Button className="bg-cyan-500 hover:bg-cyan-600" asChild>
+                    <Link href="/training">View Training Modules</Link>
+                  </Button>
+                </Card>
+              ) : (
+                <>
               {/* PMA Educational Disclaimer */}
               <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30 p-4">
                 <div className="flex items-start gap-3">
@@ -782,6 +801,10 @@ export default function DoctorsPortal() {
                   </div>
                 </div>
               </Card>
+
+              <div className="mb-6">
+                <MicroscopeLiveAnalyzer />
+              </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <BloodAnalysisUpload 
@@ -866,9 +889,26 @@ export default function DoctorsPortal() {
                   ))}
                 </div>
               </Card>
+             </>
+            )}
             </TabsContent>
 
             <TabsContent value="protocols" className="space-y-6">
+              {!hasProtocolsAccess ? (
+                <Card className="bg-black/20 border-white/10 p-12 text-center">
+                  <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-6">
+                    <Shield className="w-10 h-10 text-amber-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">Certification Required</h3>
+                  <p className="text-white/60 max-w-lg mx-auto mb-8">
+                    To generate Patient Protocols and Templates, you must first complete the Protocol Development Certification.
+                  </p>
+                  <Button className="bg-amber-500 hover:bg-amber-600 outline-none text-white" asChild>
+                    <Link href="/training">View Training Modules</Link>
+                  </Button>
+                </Card>
+              ) : (
+                <>
               {/* Active Patient Protocols */}
               <Card className="bg-gradient-to-br from-cyan-500/5 to-blue-500/5 border-cyan-500/20 p-5">
                 <div className="flex items-center justify-between mb-4">
@@ -1012,6 +1052,8 @@ export default function DoctorsPortal() {
                   </div>
                 </div>
               </Card>
+             </>
+            )}
             </TabsContent>
 
             <TabsContent value="documents" className="space-y-6">
