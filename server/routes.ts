@@ -4314,6 +4314,38 @@ Only flag significant formations. If the frame is relatively clear, return empty
     }
   });
 
+  app.post("/api/admin/clean-duplicate-tasks", requireRole("admin"), async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { agentTasks } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+
+      const tasks = await db.select().from(agentTasks)
+        .where(eq(agentTasks.status, 'pending'))
+        .orderBy(desc(agentTasks.createdAt));
+
+      const seenKeys = new Set<string>();
+      let deletedCount = 0;
+
+      for (const task of tasks) {
+        if (task.description?.includes("CROSS-DIVISION SUPPORT REQUEST")) {
+          const key = `${task.agentId}_${task.parentTaskId}`;
+          if (seenKeys.has(key)) {
+            await db.delete(agentTasks).where(eq(agentTasks.id, task.id));
+            deletedCount++;
+          } else {
+            seenKeys.add(key);
+          }
+        }
+      }
+
+      res.json({ success: true, deletedCount, message: `Successfully cleared ${deletedCount} stranded duplicate tasks from the active priority queue.` });
+    } catch (error: any) {
+      console.error("[Cleanup] Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // =============================================
   // Core Agent Network APIs (5 Core Agents)
   // =============================================
