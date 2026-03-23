@@ -279,6 +279,10 @@ This is a Private Membership Association (PMA) contract. A PMA is NOT a regulate
 7. STATE ADDENDUMS: Flag any areas where state-specific addendums may be needed as clinics come online in different jurisdictions — but these go in separate clinic onboarding documents, NOT in this master contract.
 `;
 
+  const UNIVERSAL_MANDATE = `
+CORE MANDATE: 
+You are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
+
   const reviewAssignments = [
     {
       agentId: 'JURIS',
@@ -299,6 +303,7 @@ ANALYZE:
 5. State addendum needs: Flag any constitutional or structural areas where specific states may require addendum language when clinics onboard.
 
 Keep findings focused and practical. If something is solid, say it's solid. Provide solutions, not fear.
+${UNIVERSAL_MANDATE}
 
 RESPOND IN VALID JSON FORMAT:
 {
@@ -325,6 +330,7 @@ ANALYZE:
 5. Overall language quality: Any vague terms, ambiguous phrases, or internally contradictory language? Flag with specific fixes.
 
 Be practical. This is a membership contract, not a legal treatise. Clear, enforceable language is the goal.
+${UNIVERSAL_MANDATE}
 
 RESPOND IN VALID JSON FORMAT:
 {
@@ -351,6 +357,7 @@ ANALYZE:
 5. State-specific risk: Flag any states where PMA protections are notably weaker or where specific addendum language would strengthen the risk posture when clinics onboard.
 
 Focus on practical risk reduction. What makes this contract STRONGER, not what makes lawyers nervous. Solutions, not rabbit holes.
+${UNIVERSAL_MANDATE}
 
 RESPOND IN VALID JSON FORMAT:
 {
@@ -378,6 +385,7 @@ ANALYZE:
 6. Missing elements: Any standard contract boilerplate that should be added? Note: severability, governing law, amendments, and entire agreement clauses are already present.
 
 Keep it practical. This document needs to be signable by regular people at a clinic front desk — clean, professional, not intimidating.
+${UNIVERSAL_MANDATE}
 
 RESPOND IN VALID JSON FORMAT:
 {

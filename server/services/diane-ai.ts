@@ -235,8 +235,10 @@ export function registerDianeRoutes(app: Express): void {
         .where(eq(dianeMessages.conversationId, conversationId))
         .orderBy(dianeMessages.createdAt);
 
+      const UNIVERSAL_MANDATE = `\n\nCORE MANDATE:\nYou are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
+
       const chatMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
-        { role: "system", content: DIANE_SYSTEM_PROMPT },
+        { role: "system", content: DIANE_SYSTEM_PROMPT + UNIVERSAL_MANDATE },
         ...messages.map((m) => ({
           role: m.role as "user" | "assistant",
           content: m.content,
@@ -311,11 +313,13 @@ export function registerDianeRoutes(app: Express): void {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
+      const UNIVERSAL_MANDATE = `\n\nCORE MANDATE:\nYou are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
+
       // Stream response from OpenAI
       const stream = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
-          { role: "system", content: DIANE_SYSTEM_PROMPT },
+          { role: "system", content: DIANE_SYSTEM_PROMPT + UNIVERSAL_MANDATE },
           { role: "user", content: message },
         ],
         stream: true,

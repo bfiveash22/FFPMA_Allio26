@@ -5,6 +5,10 @@ const ai = new GoogleGenAI({
   ...((!process.env.GEMINI_API_KEY && !process.env.GOOGLE_GEMINI_API_KEY && process.env.AI_INTEGRATIONS_GEMINI_BASE_URL) ? { httpOptions: { apiVersion: '', baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL } } : {}),
 });
 
+const UNIVERSAL_MANDATE = `
+CORE MANDATE: 
+You are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
+
 export interface TrainingContent {
   title: string;
   description: string;
@@ -47,7 +51,8 @@ Respond in JSON format:
   "difficulty": "beginner|intermediate|advanced"
 }
 
-Make the content warm, informative, and empowering - not clinical or dry.`;
+Make the content warm, informative, and empowering - not clinical or dry.
+${UNIVERSAL_MANDATE}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -79,7 +84,8 @@ Create:
 
 Respond in JSON: {"summary": "string", "keyPoints": ["string"]}
 
-Make it accessible and actionable, not academic.`;
+Make it accessible and actionable, not academic.
+${UNIVERSAL_MANDATE}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -119,7 +125,8 @@ Respond in JSON:
   "scenes": [{"narration": "string", "visualDescription": "string", "duration": "string"}]
 }
 
-Make it educational yet captivating.`;
+Make it educational yet captivating.
+${UNIVERSAL_MANDATE}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -146,7 +153,8 @@ Create detailed, accurate educational content about the relationship between die
 - Lifestyle recommendations
 - Evidence-based approaches
 
-Write 4-5 paragraphs of substantive educational content.`;
+Write 4-5 paragraphs of substantive educational content.
+${UNIVERSAL_MANDATE}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",

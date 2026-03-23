@@ -99,12 +99,19 @@ export function auditLog() {
   };
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const r = req as any;
   const isAuth = r.isAuthenticated ? r.isAuthenticated() : false;
   const hasSub = !!r.user?.claims?.sub;
 
   if (isAuth && hasSub) {
+    return next();
+  }
+
+  const apiResult = await validateApiKey(req);
+  if (apiResult.valid) {
+    r.apiKeyId = apiResult.keyId;
+    r.apiKeyPermissions = apiResult.permissions;
     return next();
   }
 
@@ -114,27 +121,29 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 export function requireRole(...allowedRoles: string[]) {
   return async (req: Request, res: Response, next: NextFunction) => {
+    const apiResult = await validateApiKey(req);
+    if (apiResult.valid) {
+      const method = req.method.toUpperCase();
+      const needsWrite = method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS';
+      if (needsWrite && apiResult.permissions && !apiResult.permissions.includes('write')) {
+        return res.status(403).json({ error: 'API key lacks write permission' });
+      }
+      (req as any).apiKeyId = apiResult.keyId;
+      (req as any).apiKeyPermissions = apiResult.permissions;
+      return next();
+    }
+
+    if (allowedRoles.includes('admin')) {
+      if (isValidPreviewMode(req)) {
+        return next();
+      }
+    }
+
     const r = req as any;
     const isAuth = r.isAuthenticated ? r.isAuthenticated() : false;
     const hasSub = !!r.user?.claims?.sub;
 
     if (!isAuth || !hasSub) {
-      if (allowedRoles.includes('admin')) {
-        const apiResult = await validateApiKey(req);
-        if (apiResult.valid) {
-          const method = req.method.toUpperCase();
-          const needsWrite = method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS';
-          if (needsWrite && apiResult.permissions && !apiResult.permissions.includes('write')) {
-            return res.status(403).json({ error: 'API key lacks write permission' });
-          }
-          r.apiKeyId = apiResult.keyId;
-          r.apiKeyPermissions = apiResult.permissions;
-          return next();
-        }
-        if (isValidPreviewMode(req)) {
-          return next();
-        }
-      }
       console.log(`[AUTH MIDDLEWARE] 401 on ${req.method} ${req.path} | isAuthenticated=${isAuth} hasSub=${hasSub} hasSession=${!!r.session?.id} hasCookie=${!!req.headers.cookie}`);
       return res.status(401).json({ error: 'Authentication required' });
     }

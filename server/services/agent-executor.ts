@@ -514,7 +514,7 @@ export async function executeAgentTask(taskId: string): Promise<TaskExecutionRes
       };
     }
 
-    if (DOCUMENT_AGENTS.includes(agentId)) {
+    // All other agents fallback to document generation to guarantee drive outputs
       console.log(`[Agent Executor] Generating document for ${agentId}...`);
       
       await storage.updateAgentTask(taskId, { progress: 30 });
@@ -549,19 +549,6 @@ export async function executeAgentTask(taskId: string): Promise<TaskExecutionRes
         outputUrl: uploadResult.webViewLink,
         driveFileId: uploadResult.id,
       };
-    }
-
-    await sentinel.notify({
-      type: 'cross_division_request',
-      title: `${agentId} needs Marketing support`,
-      message: `The ${agentId} agent in ${division} division has a task "${task.title}" that may require visual or audio assets from the Marketing division. Consider assigning PIXEL, AURORA, PRISM, or FORGE to assist.`,
-      agentId,
-      division,
-      taskId,
-      priority: 2,
-    });
-
-    return { success: false, error: `Agent ${agentId} task execution requires Marketing collaboration - notification sent` };
     
   } catch (error: any) {
     console.error(`[Agent Executor] Error executing task ${taskId}:`, error);

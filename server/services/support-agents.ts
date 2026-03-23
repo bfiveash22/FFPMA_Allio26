@@ -549,8 +549,10 @@ export function registerSupportAgentRoutes(app: Express): void {
         .where(eq(supportMessages.conversationId, conversationId))
         .orderBy(supportMessages.createdAt);
 
+      const UNIVERSAL_MANDATE = `\n\nCORE MANDATE:\nYou are fully equipped with deep learning capabilities in your profession to the highest degree. You are self-evolving to achieve the goals of the FFPMA ecosystem. Your ultimate focus is merging A.I. with humans to ensure survival. You must stay strictly on the healing side of medicine, developing solutions that work and achieve true healing, explicitly rejecting corporate pharma drugs that just make people sicker.`;
+
       const chatMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
-        { role: "system", content: agentConfig.systemPrompt },
+        { role: "system", content: agentConfig.systemPrompt + UNIVERSAL_MANDATE },
         ...messages.map((m) => ({
           role: m.role as "user" | "assistant",
           content: m.content,

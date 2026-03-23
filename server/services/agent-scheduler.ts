@@ -7,12 +7,14 @@ const BASE_CHECK_INTERVAL = 10 * 60 * 1000; // 10 minutes baseline
 const HIGH_ACTIVITY_CHECK_INTERVAL_MIN = 5 * 60 * 1000; // 5 minutes when 10+ agents
 const HIGH_ACTIVITY_CHECK_INTERVAL_MAX = 7 * 60 * 1000; // 7 minutes when 10+ agents
 const CROSS_DIVISION_CHECK_INTERVAL = 10 * 60 * 1000; // 10 minutes for cross-division routing
-const MAX_CONCURRENT_TASKS = 4; // Increased for more parallel execution
+const EVOLUTION_CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours for autonomous ecosystem evolution
+const MAX_CONCURRENT_TASKS = 8; // Increased for more parallel execution
 const HIGH_ACTIVITY_THRESHOLD = 10; // Number of active tasks before switching to high-activity mode
 
 let schedulerRunning = false;
 let schedulerInterval: NodeJS.Timeout | null = null;
 let crossDivisionInterval: NodeJS.Timeout | null = null;
+let evolutionInterval: NodeJS.Timeout | null = null;
 let activeExecutions = 0;
 let lastCrossDivisionCheck = new Date();
 
@@ -556,6 +558,30 @@ This is cross-division support for ${sourceTask.agentId.toUpperCase()}`,
   }
 }
 
+async function triggerSystemEvolution(): Promise<void> {
+  log('[SENTINEL] Running autonomous system evolution evaluation...', 'agent-scheduler');
+  try {
+    const allTasks = await storage.getAllAgentTasks();
+    const completedTasks = allTasks.filter(t => t.status === 'completed').length;
+    
+    await storage.createAgentTask({
+      agentId: 'SENTINEL',
+      division: 'executive',
+      title: `Ecosystem Optimization & Evolution Analysis #${Math.floor(Date.now() / 100000)}`,
+      description: `AUTONOMOUS EVOLUTION PROTOCOL:
+Review the current ecosystem performance and agent capabilities.
+Total completed tasks network-wide: ${completedTasks}.
+Analyze current outputs and identify one new efficiency improvement, missing capability, or agent synergy to implement.
+Generate a comprehensive document detailing the optimization plan and push it to the drive.`,
+      priority: 5,
+    });
+    
+    log('[SENTINEL] Evolution protocol executed: Optimization task generated.', 'agent-scheduler');
+  } catch (error: any) {
+    log(`[SENTINEL] Evolution error: ${error.message}`, 'agent-scheduler');
+  }
+}
+
 export async function startAgentScheduler(): Promise<void> {
   if (schedulerRunning) {
     log('[Scheduler] Already running', 'agent-scheduler');
@@ -615,6 +641,14 @@ export async function startAgentScheduler(): Promise<void> {
     }
   }, CROSS_DIVISION_CHECK_INTERVAL);
 
+  evolutionInterval = setInterval(async () => {
+    try {
+      await triggerSystemEvolution();
+    } catch (err: any) {
+      log(`[SENTINEL] Evolution loop error: ${err.message}`, 'agent-scheduler');
+    }
+  }, EVOLUTION_CHECK_INTERVAL);
+
   log('[SENTINEL] Agent scheduler started successfully', 'agent-scheduler');
 }
 
@@ -626,6 +660,10 @@ export function stopAgentScheduler(): void {
   if (crossDivisionInterval) {
     clearInterval(crossDivisionInterval);
     crossDivisionInterval = null;
+  }
+  if (evolutionInterval) {
+    clearInterval(evolutionInterval);
+    evolutionInterval = null;
   }
   schedulerRunning = false;
   status.running = false;
