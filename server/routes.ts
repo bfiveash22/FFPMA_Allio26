@@ -3142,6 +3142,24 @@ Only flag significant formations. If the frame is relatively clear, return empty
     });
   });
 
+  // Receive WooCommerce Webhooks (e.g. Order Created/Updated)
+  app.post("/api/woocommerce/webhooks/orders", async (req: Request, res: Response) => {
+    try {
+      console.log('[WOOCOMMERCE] Received order webhook snippet for id:', req.body?.id);
+      
+      const order = req.body;
+      if (order && order.status === 'completed' && order.billing?.email) {
+        console.log(`[WOOCOMMERCE] Processing completed order for ${order.billing.email}`);
+        // Link logic to grant product-specific rights to users based on order line items
+      }
+      
+      res.status(200).send('OK');
+    } catch (error: any) {
+      console.error('[WOOCOMMERCE] Webhook error:', error.message);
+      res.status(500).send('Error processing WooCommerce webhook');
+    }
+  });
+
   // Contract Routes
   
   const DOCTOR_TEMPLATE_ID = process.env.SIGNNOW_DOCTOR_ONBOARDING_TEMPLATE_ID || process.env.SIGNNOW_DOCTOR_TEMPLATE_ID || '253597f6c6724abd976af62a69b3e0a5b92b38dd';
