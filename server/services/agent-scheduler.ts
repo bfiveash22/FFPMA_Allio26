@@ -89,7 +89,7 @@ async function processImmediateResumeQueue(): Promise<void> {
         continue;
       }
       
-      if (task.status === 'completed' || task.status === 'cancelled') {
+      if (task.status === 'completed' || task.status === 'blocked') {
         log(`[SENTINEL] Immediate resume: Task ${item.taskId} already ${task.status}`, 'agent-scheduler');
         lockedForImmediateResume.delete(item.taskId);
         continue;
@@ -105,7 +105,7 @@ async function processImmediateResumeQueue(): Promise<void> {
         const result = await executeAgentTask(task.id);
         status.tasksProcessed++;
         
-        if (result.status === 'completed') {
+        if (result.success) {
           log(`[SENTINEL] Immediate resume SUCCESS: ${item.agentId.toUpperCase()} completed task after receiving asset`, 'agent-scheduler');
           await handleTaskCompletion(task, result);
         }

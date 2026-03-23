@@ -6600,5 +6600,101 @@ Status: DRAFT - Pending Trustee Review`,
     }
   });
 
+  // ============================================================
+  // OPENCLAW WEBHOOK RECEIVER
+  // ============================================================
+  // Receives incoming messages/task-results from OpenClaw (Agent 4).
+  // Authenticated via Bearer allio_ API key with read+write permissions.
+  // The payload is routed into the SENTINEL orchestrator as an agent task
+  // completion or an autonomous instruction, closing the circular loop.
+  app.post("/api/webhooks/openclaw", async (req: Request, res: Response) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader || !authHeader.startsWith('Bearer allio_')) {
+        return res.status(401).json({ error: 'Missing or invalid authorization header. Expected: Bearer allio_<key>' });
+      }
+
+      const rawKey = authHeader.substring(7);
+      const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+      const { apiKeys: apiKeysTable } = await import('@shared/schema');
+      const { and, eq: drizzleEq } = await import('drizzle-orm');
+      const keyRows = await db.select().from(apiKeysTable)
+        .where(and(drizzleEq(apiKeysTable.keyHash, keyHash), drizzleEq(apiKeysTable.isActive, true)));
+
+      if (keyRows.length === 0) {
+        return res.status(401).json({ error: 'Invalid or inactive API key' });
+      }
+
+      const key = keyRows[0];
+      await db.update(apiKeysTable).set({ lastUsedAt: new Date() }).where(drizzleEq(apiKeysTable.id, key.id));
+
+      const {
+        type,
+        agentId,
+        taskId,
+        payload,
+        outputUrl,
+        status,
+        message,
+        feedbackLoop,
+      } = req.body;
+
+      console.log(`[OPENCLAW WEBHOOK] Received event from ${key.name}: type=${type} agentId=${agentId} taskId=${taskId}`);
+
+      if (!type) {
+        return res.status(400).json({ error: 'Missing required field: type' });
+      }
+
+      const WRITE_EVENT_TYPES = ['task_complete', 'task_route', 'feedback_loop'];
+      if (WRITE_EVENT_TYPES.includes(type)) {
+        if (!key.permissions || !key.permissions.includes('write')) {
+          console.warn(`[OPENCLAW WEBHOOK] Key ${key.name} lacks write permission for event type: ${type}`);
+          return res.status(403).json({ error: `API key lacks write permission required for event type: ${type}` });
+        }
+      }
+
+      const { orchestrator } = await import('./services/sentinel-orchestrator');
+      const { sentinel } = await import('./services/sentinel');
+
+      if (type === 'task_complete' && taskId && outputUrl) {
+        const completed = await orchestrator.completeTask(taskId, outputUrl);
+        console.log(`[OPENCLAW WEBHOOK] Task ${taskId} completion: ${completed}`);
+        return res.json({ success: true, processed: 'task_complete', taskId, completed });
+      }
+
+      if (type === 'task_route' && agentId && payload) {
+        const task = await orchestrator.assignTask({
+          agentId,
+          title: payload.title || 'OpenClaw Autonomous Task',
+          description: payload.description || String(payload),
+          priority: payload.priority || 2,
+          assignedBy: `OPENCLAW/${key.name}`,
+        });
+        console.log(`[OPENCLAW WEBHOOK] Task routed to ${agentId}: ${task.id}`);
+        return res.json({ success: true, processed: 'task_route', taskId: task.id });
+      }
+
+      if (type === 'feedback_loop' && message) {
+        await sentinel.broadcastSystemStatus(
+          `[OPENCLAW FEEDBACK] ${message}`,
+          feedbackLoop?.priority || 2
+        );
+        console.log(`[OPENCLAW WEBHOOK] Feedback loop message broadcast: ${message.substring(0, 100)}`);
+        return res.json({ success: true, processed: 'feedback_loop' });
+      }
+
+      if (type === 'status_report') {
+        console.log(`[OPENCLAW WEBHOOK] Status report from ${key.name}: ${JSON.stringify(payload || status || {}).substring(0, 200)}`);
+        return res.json({ success: true, processed: 'status_report', received: new Date().toISOString() });
+      }
+
+      console.log(`[OPENCLAW WEBHOOK] Unhandled event type: ${type}`);
+      return res.json({ success: true, processed: 'acknowledged', type });
+    } catch (error: any) {
+      console.error('[OPENCLAW WEBHOOK] Error:', error.message);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   return httpServer;
 }

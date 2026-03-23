@@ -65,7 +65,7 @@ USE_STAGING = "false"
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
+externalPort = 80
 
 [[ports]]
 localPort = 5173
@@ -75,9 +75,6 @@ externalPort = 5173
 localPort = 8080
 externalPort = 8080
 
-[[ports]]
-localPort = 18352
-externalPort = 80
 
 [[ports]]
 localPort = 19237

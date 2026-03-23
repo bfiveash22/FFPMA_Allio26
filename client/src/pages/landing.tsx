@@ -38,6 +38,8 @@ import {
   HeartPulse,
 } from "lucide-react";
 
+const allioIntroVideo = "/generated/allio_v1_intro_video.mp4";
+
 const features = [
   {
     icon: Shield,

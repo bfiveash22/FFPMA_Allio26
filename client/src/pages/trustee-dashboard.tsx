@@ -1641,7 +1641,7 @@ export default function TrusteeDashboard() {
           </Card>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="bg-black/40 border border-white/10 p-1 flex-wrap h-auto gap-1">
+            <TabsList className="bg-black/40 border border-white/10 p-1 h-auto gap-1 flex flex-nowrap overflow-x-auto scrollbar-none w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <TabsTrigger value="command-center" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-300" data-testid="tab-command-center">
                 <Crown className="w-4 h-4 mr-2" />
                 Command Center

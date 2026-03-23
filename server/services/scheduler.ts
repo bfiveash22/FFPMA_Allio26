@@ -48,9 +48,9 @@ async function getTaskStats(): Promise<{ pending: number; inProgress: number; co
     const pending = allTasks.filter(t => t.status === 'pending').length;
     const inProgress = allTasks.filter(t => t.status === 'in_progress').length;
     const completedToday = allTasks.filter(t => t.status === 'completed' && t.completedAt && new Date(t.completedAt) >= startOfDay).length;
-    const failedToday = allTasks.filter(t => t.status === 'failed' && t.updatedAt && new Date(t.updatedAt) >= startOfDay).length;
+    const failedToday = allTasks.filter(t => t.status === 'blocked' && t.updatedAt && new Date(t.updatedAt) >= startOfDay).length;
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
-    const stuck = allTasks.filter(t => t.status === 'in_progress' && t.startedAt && new Date(t.startedAt) < twoHoursAgo).length;
+    const stuck = allTasks.filter(t => t.status === 'in_progress' && t.updatedAt && new Date(t.updatedAt) < twoHoursAgo).length;
 
     return { pending, inProgress, completedToday, failedToday, stuck };
   } catch {

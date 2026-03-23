@@ -31,6 +31,10 @@ import {
 } from "lucide-react";
 import type { TrainingModule, TrainingTrack, Quiz, DriveDocument, Achievement } from "@shared/schema";
 
+interface TrainingModuleWithProgress extends TrainingModule {
+  progress?: number;
+}
+
 interface UserAchievement {
   id: string;
   achievementId: string;
@@ -93,7 +97,7 @@ export default function TrainingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: modules = [], isLoading: modulesLoading } = useQuery<TrainingModule[]>({
+  const { data: modules = [], isLoading: modulesLoading } = useQuery<TrainingModuleWithProgress[]>({
     queryKey: ["/api/training/modules"],
   });
 
