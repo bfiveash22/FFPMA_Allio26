@@ -228,58 +228,104 @@ export interface VideoGenerationResponse {
   prompt: string;
   metadata: {
     generatedAt: string;
+    jobId?: string;
   };
 }
 
-// Generate Video using LTX-Video
+// Generate Video using Luma Dream Machine API for 100/100 cinematic quality
 export async function generateVideo(prompt: string): Promise<VideoGenerationResponse> {
-  let videoBlob: Blob;
-
-  try {
-    // LTX-Video via standard fetch to HF API to ensure compatibility
-    const response = await fetch(`https://api-inference.huggingface.co/models/${LTX_VIDEO}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({ inputs: prompt }),
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HF API error: ${response.statusText} - ${errorText}`);
-    }
-    
-    videoBlob = await response.blob();
-  } catch (error: any) {
-    throw new Error(`Video generation failed: ${error.message}`);
+  const apiKey = process.env.LUMAAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('LUMAAI_API_KEY is required for 100/100 cinematic video generation. Please add it to your environment variables.');
   }
 
-  // Save the video to the filesystem
-  const arrayBuffer = await videoBlob.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  
-  const timestamp = Date.now();
-  const filename = `ffpma-video-${timestamp}.mp4`;
-  const publicDir = path.join(process.cwd(), 'client', 'public', 'generated');
-  
-  // Ensure directory exists
   try {
-    await fs.mkdir(publicDir, { recursive: true });
-  } catch (err) {}
-  
-  const filepath = path.join(publicDir, filename);
-  await fs.writeFile(filepath, buffer);
+    // 1. Initiate Generation
+    const createRes = await fetch('https://api.lumalabs.ai/dream-machine/v1/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ prompt })
+    });
 
-  return {
-    videoUrl: `/generated/${filename}`,
-    modelUsed: LTX_VIDEO,
-    prompt,
-    metadata: {
-      generatedAt: new Date().toISOString()
+    if (!createRes.ok) {
+      const errorText = await createRes.text();
+      throw new Error(`Luma API creation failed: ${createRes.status} - ${errorText}`);
     }
-  };
+
+    const job = await createRes.json();
+    const jobId = job.id;
+    console.log(`[Luma AI] Video generation started. Job ID: ${jobId}`);
+
+    // 2. Poll for Completion (with a timeout mechanism)
+    let videoDownloadUrl = null;
+    const maxRetries = 60; // 5 minutes max (polling every 5s)
+    let retries = 0;
+
+    while (retries < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      retries++;
+
+      const statusRes = await fetch(`https://api.lumalabs.ai/dream-machine/v1/generations/${jobId}`, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!statusRes.ok) continue;
+
+      const statusData = await statusRes.json();
+      console.log(`[Luma AI] Job ${jobId} status: ${statusData.state}`);
+
+      if (statusData.state === 'completed') {
+        videoDownloadUrl = statusData.assets?.video;
+        break;
+      } else if (statusData.state === 'failed') {
+        throw new Error(`Luma generation failed. Reason: ${statusData.failure_reason || 'Unknown error'}`);
+      }
+    }
+
+    if (!videoDownloadUrl) {
+      throw new Error('Luma generation timed out waiting for completion.');
+    }
+
+    // 3. Download the video artifact
+    console.log(`[Luma AI] Job completed. Downloading video from: ${videoDownloadUrl}`);
+    const videoRes = await fetch(videoDownloadUrl);
+    if (!videoRes.ok) throw new Error('Failed to download generated video artifact');
+    
+    const arrayBuffer = await videoRes.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    const timestamp = Date.now();
+    const filename = `allio-cinematic-${timestamp}.mp4`;
+    const publicDir = path.join(process.cwd(), 'client', 'public', 'generated');
+    
+    try {
+      await fs.mkdir(publicDir, { recursive: true });
+    } catch (err) {}
+    
+    const filepath = path.join(publicDir, filename);
+    await fs.writeFile(filepath, buffer);
+
+    console.log(`[Luma AI] Video saved locally: ${filepath}`);
+
+    return {
+      videoUrl: `/generated/${filename}`,
+      modelUsed: 'Luma Dream Machine',
+      prompt,
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        jobId
+      }
+    };
+  } catch (error: any) {
+    throw new Error(`High-quality video generation failed: ${error.message}`);
+  }
 }
 
 // Image enhancement/editing (image-to-image)
