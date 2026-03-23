@@ -315,7 +315,7 @@ export default function SupportPage() {
           </div>
 
           <div className="lg:col-span-3">
-            <Card className="h-[calc(100vh-350px)] min-h-[500px] flex flex-col">
+            <Card className="h-[calc(100dvh-350px)] min-h-[500px] flex flex-col">
               {!activeConversation ? (
                 <CardContent className="flex-1 flex flex-col items-center justify-center">
                   <div className={`flex h-16 w-16 items-center justify-center rounded-full mb-4 ${colorClasses.bg}`}>

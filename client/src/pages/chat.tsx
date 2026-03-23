@@ -87,7 +87,7 @@ export default function ChatPage() {
   const userId = user?.id;
 
   return (
-    <div className="flex h-[calc(100vh-60px)]">
+    <div className="flex h-[calc(100dvh-60px)]">
       <div className="w-80 border-r flex flex-col">
         <div className="p-4 border-b flex items-center justify-between gap-2">
           <h2 className="font-semibold flex items-center gap-2">

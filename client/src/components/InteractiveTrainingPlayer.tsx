@@ -420,7 +420,7 @@ export function InteractiveTrainingPlayer({
               <div className="relative">
                 <iframe
                   src={getPdfViewerUrl()}
-                  className="w-full h-[600px] border-0"
+                  className="w-full h-[calc(100dvh-300px)] min-h-[400px] border-0"
                   title="Training Document"
                   allow="autoplay"
                 />

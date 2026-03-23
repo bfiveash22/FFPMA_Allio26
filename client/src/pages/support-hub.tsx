@@ -302,7 +302,7 @@ export default function SupportHub() {
           </div>
 
           <div className="lg:col-span-2">
-            <Card className="bg-slate-800/30 border-white/10 h-[calc(100vh-200px)] flex flex-col">
+            <Card className="bg-slate-800/30 border-white/10 h-[calc(100dvh-200px)] flex flex-col">
               {selectedAgent && activeAgent ? (
                 <>
                   <div className="p-4 border-b border-white/10 flex items-center gap-3">

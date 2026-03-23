@@ -274,7 +274,7 @@ export default function DianePage() {
 
   return (
     <main className="flex-1 overflow-hidden">
-      <div className="flex h-[calc(100vh-3.5rem)]">
+      <div className="flex h-[calc(100dvh-3.5rem)]">
         <div className="w-80 border-r bg-muted/30 flex flex-col">
           <div className="p-4 border-b">
             <div className="flex items-center gap-3 mb-3">

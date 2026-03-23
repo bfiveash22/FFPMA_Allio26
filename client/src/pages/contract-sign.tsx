@@ -291,7 +291,7 @@ export default function ContractSignPage() {
             </div>
             <iframe
               src={contract.embeddedSigningUrl}
-              className="w-full h-[700px] border-0"
+              className="w-full h-[calc(100dvh-200px)] min-h-[500px] border-0"
               title="SignNow Document Signing"
               allow="camera; microphone"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"

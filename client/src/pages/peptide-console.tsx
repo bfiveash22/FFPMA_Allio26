@@ -24,7 +24,7 @@ export default function PeptideConsolePage() {
 
         <div className="grid gap-6 lg:grid-cols-4">
           <div className="lg:col-span-3">
-            <Card className="h-[calc(100vh-200px)] min-h-[600px]">
+            <Card className="h-[calc(100dvh-200px)] min-h-[600px]">
               <CardContent className="p-0 h-full">
                 <iframe
                   src="https://peptide-chat.abacusai.app"
