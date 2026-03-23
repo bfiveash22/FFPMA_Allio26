@@ -1278,7 +1278,7 @@ const marketingAssets = [
   { id: "ct-wise-cowboy", name: "C.T. Wise Cowboy Character", type: "character", status: "Complete", agent: "PRISM + FORGE", date: "Jan 12, 2026", description: "Sam Elliott-style character concept - weathered cowboy with kind eyes representing ancient wisdom", imagePath: "/generated/ct_wise_cowboy_portrait.png" },
   { id: "brand-pattern", name: "Allio Brand Pattern", type: "image", status: "Complete", agent: "PIXEL", date: "Jan 12, 2026", description: "Seamless geometric pattern with sacred geometry, DNA, and frequency waves", imagePath: "/generated/allio_brand_pattern_design.png" },
   { id: "ai-human-coexistence", name: "AI-Human Healing Coexistence", type: "image", status: "Complete", agent: "PIXEL", date: "Jan 12, 2026", description: "Team of healthcare professionals and AI working together in futuristic healing center", imagePath: "/generated/ai_human_healing_coexistence.png" },
-  { id: "healing-journey", name: "Healing Journey Documentary", type: "video", status: "Planning", agent: "FORGE", date: "Feb 2026", description: "Member transformation stories and testimonials" },
+  { id: "healing-journey", name: "Healing Journey Documentary", type: "video", status: "Planning", agent: "FORGE", date: "Feb 2026", description: "Member transformation stories and testimonials", videoPath: "/generated/sample-healing-video.mp4" },
 ];
 
 interface MarketingAsset {
@@ -1290,6 +1290,7 @@ interface MarketingAsset {
   date: string;
   description: string;
   imagePath?: string;
+  videoPath?: string;
 }
 
 export default function Dashboard() {
@@ -1303,6 +1304,7 @@ export default function Dashboard() {
   const [emailForm, setEmailForm] = useState({ to: '', subject: '', body: '' });
   const [emailSending, setEmailSending] = useState(false);
   const [emailStatus, setEmailStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [playingVideoUrl, setPlayingVideoUrl] = useState<string | null>(null);
   const [previewAsset, setPreviewAsset] = useState<MarketingAsset | null>(null);
   const [downloadStatus, setDownloadStatus] = useState<string | null>(null);
   const [agentMessages, setAgentMessages] = useState(initialAgentMessages);
@@ -3796,9 +3798,12 @@ export default function Dashboard() {
                 <Button 
                   className="flex-1 bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 text-white border-0 py-6"
                   onClick={() => {
-                    setPreviewAsset(null);
-                    setDownloadStatus('Starting playback... Full video player coming soon!');
-                    setTimeout(() => setDownloadStatus(null), 3000);
+                    if (previewAsset.type === 'video') {
+                      setPlayingVideoUrl(previewAsset.videoPath || "/generated/placeholder-video.mp4");
+                    } else {
+                      setDownloadStatus('This asset is not a video.');
+                      setTimeout(() => setDownloadStatus(null), 3000);
+                    }
                   }}
                 >
                   <Play className="w-5 h-5 mr-2" />

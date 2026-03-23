@@ -66,6 +66,9 @@ export default function MarketingStudioPage() {
   const [assetDescription, setAssetDescription] = useState("");
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
 
+  const [videoPrompt, setVideoPrompt] = useState("");
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+
   const { data: mediaStatus } = useQuery<{
     imageGeneration: boolean;
     videoGeneration: boolean;
@@ -111,6 +114,16 @@ export default function MarketingStudioPage() {
     },
   });
 
+  const generateVideoMutation = useMutation({
+    mutationFn: async (data: { prompt: string }) => {
+      const response = await apiRequest("POST", "/api/media/generate-video", data);
+      return response.json();
+    },
+    onSuccess: (data: { videoUrl: string }) => {
+      setGeneratedVideoUrl(data.videoUrl);
+    },
+  });
+
   const handleGenerateImage = () => {
     if (!prompt.trim()) return;
     generateImageMutation.mutate({
@@ -127,6 +140,11 @@ export default function MarketingStudioPage() {
       type: assetType,
       description: assetDescription,
     });
+  };
+
+  const handleGenerateVideo = () => {
+    if (!videoPrompt.trim()) return;
+    generateVideoMutation.mutate({ prompt: videoPrompt });
   };
 
   const downloadImage = (image: GeneratedImage, index: number) => {
@@ -317,22 +335,64 @@ export default function MarketingStudioPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900/50 border-slate-700">
+              <Card className="bg-slate-900/50 border-slate-700 flex flex-col">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Video className="w-5 h-5 text-cyan-400" />
                     Video Generation
                   </CardTitle>
                   <CardDescription className="text-slate-400">
-                    Create marketing videos with LTX-Video (Coming Soon)
+                    Create marketing videos with LTX-Video
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center h-[300px] text-center">
-                  <Video className="w-16 h-16 text-slate-600 mb-4" />
-                  <p className="text-slate-400 mb-2">Video generation requires dedicated GPU endpoints</p>
-                  <Badge variant="outline" className="border-cyan-500/30 text-cyan-400">
-                    Coming with HF Inference Endpoints
-                  </Badge>
+                <CardContent className="space-y-4 flex-1 flex flex-col">
+                  <div>
+                    <label className="text-sm text-slate-300 mb-2 block">Prompt</label>
+                    <Textarea
+                      placeholder="Describe the video you want to generate..."
+                      value={videoPrompt}
+                      onChange={(e) => setVideoPrompt(e.target.value)}
+                      className="min-h-[100px] bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  
+                  <Button
+                    onClick={handleGenerateVideo}
+                    disabled={!videoPrompt.trim() || generateVideoMutation.isPending}
+                    className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+                  >
+                    {generateVideoMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating (takes 2-5 minutes)...
+                      </>
+                    ) : (
+                      <>
+                        <Video className="w-4 h-4 mr-2" />
+                        Generate Video
+                      </>
+                    )}
+                  </Button>
+                  
+                  {generateVideoMutation.isError && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                      <p className="text-red-400 text-sm">
+                        {(generateVideoMutation.error as Error)?.message || "Video generation failed"}
+                      </p>
+                    </div>
+                  )}
+
+                  {generatedVideoUrl && (
+                    <div className="mt-4 flex-1 min-h-[200px] rounded-lg border border-slate-700 overflow-hidden bg-black flex items-center justify-center">
+                      <video 
+                        src={generatedVideoUrl} 
+                        controls 
+                        autoPlay 
+                        loop 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

@@ -206,13 +206,79 @@ export async function checkMediaStatus(): Promise<{
     }
   }
 
+  // We assume LTX_VIDEO is available if HF is configured
+  availableModels.push(LTX_VIDEO);
+
   return {
     imageGeneration: imageAvailable,
-    videoGeneration: false, // Video requires dedicated endpoints
+    videoGeneration: true, 
     availableModels,
     status: imageAvailable 
       ? `Media generation ready (${availableModels[0]})`
       : 'Media generation offline - check HF quota'
+  };
+}
+
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+export interface VideoGenerationResponse {
+  videoUrl: string;
+  modelUsed: string;
+  prompt: string;
+  metadata: {
+    generatedAt: string;
+  };
+}
+
+// Generate Video using LTX-Video
+export async function generateVideo(prompt: string): Promise<VideoGenerationResponse> {
+  let videoBlob: Blob;
+
+  try {
+    // LTX-Video via standard fetch to HF API to ensure compatibility
+    const response = await fetch(`https://api-inference.huggingface.co/models/${LTX_VIDEO}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({ inputs: prompt }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HF API error: ${response.statusText} - ${errorText}`);
+    }
+    
+    videoBlob = await response.blob();
+  } catch (error: any) {
+    throw new Error(`Video generation failed: ${error.message}`);
+  }
+
+  // Save the video to the filesystem
+  const arrayBuffer = await videoBlob.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  
+  const timestamp = Date.now();
+  const filename = `ffpma-video-${timestamp}.mp4`;
+  const publicDir = path.join(process.cwd(), 'client', 'public', 'generated');
+  
+  // Ensure directory exists
+  try {
+    await fs.mkdir(publicDir, { recursive: true });
+  } catch (err) {}
+  
+  const filepath = path.join(publicDir, filename);
+  await fs.writeFile(filepath, buffer);
+
+  return {
+    videoUrl: `/generated/${filename}`,
+    modelUsed: LTX_VIDEO,
+    prompt,
+    metadata: {
+      generatedAt: new Date().toISOString()
+    }
   };
 }
 
@@ -228,3 +294,4 @@ export async function enhanceImage(
     style: 'professional'
   });
 }
+

@@ -1,0 +1,289 @@
+server/routes-full.ts(4,23): error TS2307: Cannot find module 'express-rate-limit' or its corresponding type declarations.
+server/routes-full.ts(10,65): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(11,45): error TS2307: Cannot find module './wordpress-auth' or its corresponding type declarations.
+server/routes-full.ts(12,131): error TS2307: Cannot find module './google-drive' or its corresponding type declarations.
+server/routes-full.ts(13,26): error TS2307: Cannot find module './signnow' or its corresponding type declarations.
+server/routes-full.ts(14,37): error TS2307: Cannot find module './diane-ai' or its corresponding type declarations.
+server/routes-full.ts(15,44): error TS2307: Cannot find module './support-agents' or its corresponding type declarations.
+server/routes-full.ts(33,33): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(116,39): error TS2339: Property 'getMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(123,39): error TS2339: Property 'updateMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(130,44): error TS2339: Property 'getReferralByCode' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(132,39): error TS2339: Property 'updateMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(186,45): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(212,39): error TS2339: Property 'getWpRoleMappings' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(373,38): error TS2339: Property 'getProducts' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(377,70): error TS7006: Parameter 'p' implicitly has an 'any' type.
+server/routes-full.ts(379,41): error TS2339: Property 'getProductRolePrice' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(411,37): error TS2339: Property 'getProductBySlug' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(419,39): error TS2339: Property 'getProductRolePrice' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(446,42): error TS2339: Property 'getProductVariations' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(447,78): error TS7006: Parameter 'v' implicitly has an 'any' type.
+server/routes-full.ts(449,46): error TS2339: Property 'getProductRolePrice' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(482,37): error TS2339: Property 'getProduct' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(485,40): error TS2339: Property 'getProductVariations' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(489,74): error TS7006: Parameter 'v' implicitly has an 'any' type.
+server/routes-full.ts(490,41): error TS2339: Property 'getProductRolePrice' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(521,40): error TS2339: Property 'getCategories' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(533,17): error TS2339: Property 'getLibraryItems' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(538,49): error TS7006: Parameter 'doc' implicitly has an 'any' type.
+server/routes-full.ts(591,52): error TS2307: Cannot find module './google-drive' or its corresponding type declarations.
+server/routes-full.ts(607,50): error TS2307: Cannot find module './google-drive' or its corresponding type declarations.
+server/routes-full.ts(619,50): error TS2307: Cannot find module './google-drive' or its corresponding type declarations.
+server/routes-full.ts(631,47): error TS2307: Cannot find module './google-drive' or its corresponding type declarations.
+server/routes-full.ts(643,34): error TS2339: Property 'getLibraryItemBySlug' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(649,38): error TS2551: Property 'getDriveDocumentBySlug' does not exist on type 'DatabaseStorage'. Did you mean 'getDriveDocuments'?
+server/routes-full.ts(696,36): error TS2339: Property 'getOrders' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(707,35): error TS2339: Property 'getOrder' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(711,35): error TS2339: Property 'getOrderItems' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(722,35): error TS2339: Property 'createOrder' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(737,39): error TS2551: Property 'getContracts' does not exist on type 'DatabaseStorage'. Did you mean 'getContract'?
+server/routes-full.ts(767,103): error TS2551: Property 'getClinics' does not exist on type 'DatabaseStorage'. Did you mean 'getClinic'?
+server/routes-full.ts(771,39): error TS2551: Property 'getClinics' does not exist on type 'DatabaseStorage'. Did you mean 'getClinic'?
+server/routes-full.ts(772,30): error TS7006: Parameter 'c' implicitly has an 'any' type.
+server/routes-full.ts(787,32): error TS2339: Property 'getClinicBySlug' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(844,34): error TS2339: Property 'getClinicBySlug' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(889,56): error TS2307: Cannot find module './stripe' or its corresponding type declarations.
+server/routes-full.ts(910,32): error TS2339: Property 'getUserByEmail' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(924,35): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(928,33): error TS2339: Property 'createMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(943,52): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(944,41): error TS7006: Parameter 'result' implicitly has an 'any' type.
+server/routes-full.ts(950,16): error TS7006: Parameter 'err' implicitly has an 'any' type.
+server/routes-full.ts(969,36): error TS2339: Property 'getClinicByOwner' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(983,36): error TS2339: Property 'getClinicByOwner' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(987,37): error TS2339: Property 'getMemberProfiles' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(998,36): error TS2339: Property 'createClinic' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1013,37): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1040,37): error TS2339: Property 'createMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1055,41): error TS2551: Property 'getProgramEnrollments' does not exist on type 'DatabaseStorage'. Did you mean 'getProgramEnrollment'?
+server/routes-full.ts(1083,38): error TS2339: Property 'getProducts' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1084,40): error TS2339: Property 'getCategories' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1099,42): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1116,54): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1136,39): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1144,56): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1164,39): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1172,52): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1194,39): error TS2339: Property 'getMemberProfileByUserId' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1276,29): error TS2339: Property 'createClinic' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1349,36): error TS2339: Property 'createClinic' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1407,21): error TS2339: Property 'deleteClinic' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1535,27): error TS2339: Property 'upsertWpRoleDefinition' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1556,35): error TS2339: Property 'getWpRoleDefinitions' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1566,38): error TS2339: Property 'getWpRoleMappings' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1576,37): error TS2339: Property 'createWpRoleMapping' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1586,37): error TS2339: Property 'updateWpRoleMapping' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1596,21): error TS2339: Property 'deleteWpRoleMapping' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1607,34): error TS2339: Property 'getSyncJobs' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1618,38): error TS2339: Property 'getDoctorDownline' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1633,38): error TS2339: Property 'getDoctorDownline' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1663,57): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1682,47): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1695,47): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1708,50): error TS2307: Cannot find module './wordpress-sync' or its corresponding type declarations.
+server/routes-full.ts(1885,34): error TS2339: Property 'createQuiz' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(1896,38): error TS2551: Property 'createQuizQuestion' does not exist on type 'DatabaseStorage'. Did you mean 'getQuizQuestions'?
+server/routes-full.ts(1910,36): error TS2551: Property 'createQuizAnswer' does not exist on type 'DatabaseStorage'. Did you mean 'getQuizAnswers'?
+server/routes-full.ts(1987,45): error TS2551: Property 'getDriveDocumentByDriveId' does not exist on type 'DatabaseStorage'. Did you mean 'getDriveDocuments'?
+server/routes-full.ts(2007,27): error TS2339: Property 'updateDriveDocument' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2010,27): error TS2551: Property 'createDriveDocument' does not exist on type 'DatabaseStorage'. Did you mean 'getDriveDocuments'?
+server/routes-full.ts(2099,38): error TS2551: Property 'getDriveDocumentBySlug' does not exist on type 'DatabaseStorage'. Did you mean 'getDriveDocuments'?
+server/routes-full.ts(2105,21): error TS2339: Property 'updateDriveDocument' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2123,38): error TS2554: Expected 3 arguments, but got 2.
+server/routes-full.ts(2141,36): error TS2339: Property 'getUserProgressForContent' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2157,34): error TS2551: Property 'updateUserProgress' does not exist on type 'DatabaseStorage'. Did you mean 'upsertUserProgress'?
+server/routes-full.ts(2160,34): error TS2551: Property 'createUserProgress' does not exist on type 'DatabaseStorage'. Did you mean 'getUserProgress'?
+server/routes-full.ts(2185,41): error TS2339: Property 'getTrackEnrollments' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2200,38): error TS2339: Property 'getTrackEnrollment' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2206,35): error TS2551: Property 'getTrainingTrack' does not exist on type 'DatabaseStorage'. Did you mean 'getTrainingTracks'?
+server/routes-full.ts(2211,40): error TS2551: Property 'createTrackEnrollment' does not exist on type 'DatabaseStorage'. Did you mean 'createProgramEnrollment'?
+server/routes-full.ts(2229,36): error TS2551: Property 'createTrainingModule' does not exist on type 'DatabaseStorage'. Did you mean 'getTrainingModules'?
+server/routes-full.ts(2240,35): error TS2551: Property 'createTrainingTrack' does not exist on type 'DatabaseStorage'. Did you mean 'getTrainingTracks'?
+server/routes-full.ts(2253,35): error TS2339: Property 'getAdminStats' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2264,37): error TS2339: Property 'getRecentMembers' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2281,37): error TS2551: Property 'getAllMembersWithDetails' does not exist on type 'DatabaseStorage'. Did you mean 'getAllMembersWithUsers'?
+server/routes-full.ts(2292,35): error TS2339: Property 'getMemberStatsByRole' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2316,54): error TS2307: Cannot find module './stripe' or its corresponding type declarations.
+server/routes-full.ts(2336,39): error TS2339: Property 'getProduct' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2345,41): error TS2339: Property 'getProductRolePrice' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2395,56): error TS2307: Cannot find module './stripe' or its corresponding type declarations.
+server/routes-full.ts(2510,46): error TS2339: Property 'getReferralByCode' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2513,23): error TS2339: Property 'createReferral' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2537,39): error TS2339: Property 'getReferrals' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2549,38): error TS2339: Property 'getReferralByCode' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2582,38): error TS2339: Property 'createReferral' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2607,35): error TS2339: Property 'getChatRooms' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2627,42): error TS2339: Property 'getChatParticipants' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2628,30): error TS7006: Parameter 'p' implicitly has an 'any' type.
+server/routes-full.ts(2632,38): error TS2551: Property 'getChatMessages' does not exist on type 'DatabaseStorage'. Did you mean 'getMessages'?
+server/routes-full.ts(2656,42): error TS2339: Property 'getChatParticipants' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2657,30): error TS7006: Parameter 'p' implicitly has an 'any' type.
+server/routes-full.ts(2661,37): error TS2551: Property 'createChatMessage' does not exist on type 'DatabaseStorage'. Did you mean 'createMessage'?
+server/routes-full.ts(2691,34): error TS2339: Property 'getOrCreateDirectRoom' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2710,42): error TS2339: Property 'getChatParticipants' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2711,30): error TS7006: Parameter 'p' implicitly has an 'any' type.
+server/routes-full.ts(2725,62): error TS2307: Cannot find module './stripe' or its corresponding type declarations.
+server/routes-full.ts(2764,43): error TS2339: Property 'createOrder' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2774,47): error TS2339: Property 'getProduct' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2778,33): error TS2339: Property 'createOrderItem' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(2988,39): error TS2339: Property 'getMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3079,50): error TS2307: Cannot find module './google-drive' or its corresponding type declarations.
+server/routes-full.ts(3153,47): error TS2551: Property 'getClinics' does not exist on type 'DatabaseStorage'. Did you mean 'getClinic'?
+server/routes-full.ts(3167,34): error TS2339: Property 'getUserByEmail' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3182,37): error TS2339: Property 'getMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3184,35): error TS2339: Property 'createMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3191,25): error TS2339: Property 'updateMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3200,38): error TS2339: Property 'createClinic' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3229,34): error TS2339: Property 'getUserByEmail' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3231,49): error TS2339: Property 'getMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3262,34): error TS2339: Property 'getClinicBySlug' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3266,37): error TS2339: Property 'getMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3268,35): error TS2339: Property 'createMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes-full.ts(3277,25): error TS2339: Property 'updateMemberProfile' does not exist on type 'DatabaseStorage'.
+server/routes.ts(2156,9): error TS2322: Type 'string' is not assignable to type 'number'.
+server/routes.ts(4261,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4261,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4287,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4287,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4539,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4539,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4572,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4572,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4620,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4620,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4647,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4647,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4727,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4727,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4850,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4850,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4946,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4946,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4960,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4960,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(4976,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(4976,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5003,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5003,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5143,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5143,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5168,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5168,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5255,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5255,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5329,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5329,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5356,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5356,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5383,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5383,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5393,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5393,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5407,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5407,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5417,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5417,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5430,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5430,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5443,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5443,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5477,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5477,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(5497,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(5497,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6046,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6046,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6070,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6070,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6226,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6226,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6278,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6278,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6329,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6329,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6409,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6409,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6504,24): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6504,33): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6528,24): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6528,33): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6548,24): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6548,33): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6564,24): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6564,33): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6574,24): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6574,33): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6598,22): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6598,31): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(6646,27): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(6646,36): error TS2339: Property 'claims' does not exist on type 'User'.
+server/routes.ts(7018,24): error TS18048: 'req.user' is possibly 'undefined'.
+server/routes.ts(7018,33): error TS2339: Property 'claims' does not exist on type 'User'.
+server/services/diane-ai.ts(3,20): error TS2307: Cannot find module './db' or its corresponding type declarations.
+server/services/diane-ai.ts(253,26): error TS7006: Parameter 'm' implicitly has an 'any' type.
+server/services/diane-ai.ts(381,44): error TS7006: Parameter 'm' implicitly has an 'any' type.
+server/services/diane-ai.ts(382,49): error TS7006: Parameter 'm' implicitly has an 'any' type.
+server/services/diane-ai.ts(386,29): error TS7006: Parameter 'c' implicitly has an 'any' type.
+server/services/diane-ai.ts(400,48): error TS7006: Parameter 'c' implicitly has an 'any' type.
+server/services/openclaw-monitor.ts(40,47): error TS2307: Cannot find module './email' or its corresponding type declarations.
+server/services/rag-ingestion.ts(3,10): error TS2305: Module '"@shared/schema"' has no exported member 'knowledgeDocuments'.
+server/services/rag-ingestion.ts(3,30): error TS2305: Module '"@shared/schema"' has no exported member 'knowledgeEmbeddings'.
+server/services/rag-query.ts(3,10): error TS2305: Module '"@shared/schema"' has no exported member 'knowledgeDocuments'.
+server/services/rag-query.ts(3,30): error TS2305: Module '"@shared/schema"' has no exported member 'knowledgeEmbeddings'.
+server/storage-full.ts(3,8): error TS2724: '"@shared/schema"' has no exported member named 'InsertUser'. Did you mean 'UpsertUser'?
+server/storage-full.ts(55,27): error TS2307: Cannot find module './db-storage' or its corresponding type declarations.
+server/storage-full.ts(310,7): error TS2741: Property 'wcCategoryId' is missing in type '{ id: string; name: string; slug: string; description: string; imageUrl: null; parentId: null; sortOrder: number; isActive: true; }' but required in type '{ id: string; name: string; isActive: boolean | null; slug: string; description: string | null; imageUrl: string | null; sortOrder: number | null; parentId: string | null; wcCategoryId: number | null; }'.
+server/storage-full.ts(311,7): error TS2741: Property 'wcCategoryId' is missing in type '{ id: string; name: string; slug: string; description: string; imageUrl: null; parentId: null; sortOrder: number; isActive: true; }' but required in type '{ id: string; name: string; isActive: boolean | null; slug: string; description: string | null; imageUrl: string | null; sortOrder: number | null; parentId: string | null; wcCategoryId: number | null; }'.
+server/storage-full.ts(312,7): error TS2741: Property 'wcCategoryId' is missing in type '{ id: string; name: string; slug: string; description: string; imageUrl: null; parentId: null; sortOrder: number; isActive: true; }' but required in type '{ id: string; name: string; isActive: boolean | null; slug: string; description: string | null; imageUrl: string | null; sortOrder: number | null; parentId: string | null; wcCategoryId: number | null; }'.
+server/storage-full.ts(313,7): error TS2741: Property 'wcCategoryId' is missing in type '{ id: string; name: string; slug: string; description: string; imageUrl: null; parentId: null; sortOrder: number; isActive: true; }' but required in type '{ id: string; name: string; isActive: boolean | null; slug: string; description: string | null; imageUrl: string | null; sortOrder: number | null; parentId: string | null; wcCategoryId: number | null; }'.
+server/storage-full.ts(314,7): error TS2741: Property 'wcCategoryId' is missing in type '{ id: string; name: string; slug: string; description: string; imageUrl: null; parentId: null; sortOrder: number; isActive: true; }' but required in type '{ id: string; name: string; isActive: boolean | null; slug: string; description: string | null; imageUrl: string | null; sortOrder: number | null; parentId: string | null; wcCategoryId: number | null; }'.
+server/storage-full.ts(320,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(321,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(322,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(323,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(324,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(325,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(326,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(327,7): error TS2739: Type '{ id: string; name: string; slug: string; description: string; shortDescription: string; categoryId: string; imageUrl: null; retailPrice: string; wholesalePrice: string; doctorPrice: string; sku: string; ... 8 more ...; createdAt: Date; }' is missing the following properties from type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }': images, inStock, wcProductId
+server/storage-full.ts(348,22): error TS2551: Property 'username' does not exist on type '{ id: string; createdAt: Date | null; email: string | null; firstName: string | null; lastName: string | null; profileImageUrl: string | null; wpUserId: string | null; wpUsername: string | null; wpRoles: string | null; authProvider: string | null; updatedAt: Date | null; }'. Did you mean 'wpUsername'?
+server/storage-full.ts(386,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; name: string; slug: string; retailPrice: string; isActive?: boolean | null | undefined; description?: string | null | undefined; ... 15 more ...; wcProductId?: number | ... 1 more ... | undefined; }' is not assignable to type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; description: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 14 more ...; wcProductId: number | null; }'.
+  Types of property 'isActive' are incompatible.
+    Type 'boolean | null | undefined' is not assignable to type 'boolean | null'.
+      Type 'undefined' is not assignable to type 'boolean | null'.
+server/storage-full.ts(418,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; name: string; slug: string; isActive?: boolean | null | undefined; description?: string | null | undefined; imageUrl?: string | null | undefined; sortOrder?: number | ... 1 more ... | undefined; parentId?: string | ... 1 more ... | undefined; wcCategoryId?: ...' is not assignable to type '{ id: string; name: string; isActive: boolean | null; slug: string; description: string | null; imageUrl: string | null; sortOrder: number | null; parentId: string | null; wcCategoryId: number | null; }'.
+  Types of property 'isActive' are incompatible.
+    Type 'boolean | null | undefined' is not assignable to type 'boolean | null'.
+      Type 'undefined' is not assignable to type 'boolean | null'.
+server/storage-full.ts(446,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; updatedAt: Date; userId: string; subtotal: string; total: string; clinicId?: string | null | undefined; status?: "pending" | ... 5 more ... | undefined; shipping?: string | ... 1 more ... | undefined; notes?: string | ... 1 more ... | undefi...' is not assignable to type '{ id: string; userId: string; clinicId: string | null; createdAt: Date | null; updatedAt: Date | null; status: "pending" | "cancelled" | "processing" | "shipped" | "delivered" | null; ... 5 more ...; shippingAddress: string | null; }'.
+  Types of property 'clinicId' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | null'.
+      Type 'undefined' is not assignable to type 'string | null'.
+server/storage-full.ts(486,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; name: string; slug: string; type: "iv" | "peptide" | "protocol"; isActive?: boolean | null | undefined; description?: string | null | undefined; duration?: string | ... 1 more ... | undefined; imageUrl?: string | ... 1 more ... | undefined; ...' is not assignable to type '{ id: string; name: string; isActive: boolean | null; createdAt: Date | null; slug: string; type: "iv" | "peptide" | "protocol"; description: string | null; duration: string | null; imageUrl: string | null; shortDescription: string | null; price: string | null; }'.
+  Types of property 'isActive' are incompatible.
+    Type 'boolean | null | undefined' is not assignable to type 'boolean | null'.
+      Type 'undefined' is not assignable to type 'boolean | null'.
+server/storage-full.ts(498,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; startedAt: Date; userId: string; programId: string; clinicId?: string | null | undefined; status?: string | null | undefined; progress?: number | null | undefined; completedAt?: Date | ... 1 more ... | undefined; }' is not assignable to type '{ id: string; userId: string; clinicId: string | null; status: string | null; progress: number | null; programId: string; startedAt: Date | null; completedAt: Date | null; }'.
+  Types of property 'clinicId' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | null'.
+      Type 'undefined' is not assignable to type 'string | null'.
+server/storage-full.ts(526,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; name: string; phone?: string | null | undefined; address?: string | null | undefined; city?: string | null | undefined; state?: string | ... 1 more ... | undefined; ... 35 more ...; notes?: string | ... 1 more ... | undefined; }' is not assignable to type '{ id: string; name: string; phone: string | null; address: string | null; city: string | null; state: string | null; zipCode: string | null; isActive: boolean | null; createdAt: Date | null; ... 33 more ...; notes: string | null; }'.
+  Types of property 'phone' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | null'.
+      Type 'undefined' is not assignable to type 'string | null'.
+server/storage-full.ts(562,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; userId: string; role?: "admin" | "doctor" | "clinic" | "member" | undefined; clinicId?: string | null | undefined; sponsorId?: string | ... 1 more ... | undefined; ... 10 more ...; lastSyncedAt?: Date | ... 1 more ... | undefined; }' is not assignable to type '{ id: string; userId: string; role: "admin" | "doctor" | "clinic" | "member"; clinicId: string | null; sponsorId: string | null; wpSponsorId: string | null; phone: string | null; address: string | null; ... 8 more ...; createdAt: Date | null; }'.
+  Types of property 'role' are incompatible.
+    Type '"admin" | "doctor" | "clinic" | "member" | undefined' is not assignable to type '"admin" | "doctor" | "clinic" | "member"'.
+      Type 'undefined' is not assignable to type '"admin" | "doctor" | "clinic" | "member"'.
+server/storage-full.ts(590,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; userId: string; clinicId?: string | null | undefined; phone?: string | null | undefined; status?: "pending" | "completed" | "signed" | "sent" | null | undefined; ... 12 more ...; contractUrl?: string | ... 1 more ... | undefined; }' is not assignable to type '{ id: string; userId: string; clinicId: string | null; phone: string | null; createdAt: Date | null; status: "pending" | "completed" | "signed" | "sent" | null; doctorName: string | null; ... 11 more ...; contractUrl: string | null; }'.
+  Types of property 'clinicId' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | null'.
+      Type 'undefined' is not assignable to type 'string | null'.
+server/storage-full.ts(618,11): error TS2322: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; createdAt: Date; updatedAt: Date; viewCount: number; title: string; slug: string; isActive?: boolean | null | undefined; content?: string | null | undefined; ... 8 more ...; wpPostId?: number | ... 1 more ... | undefined; }' is not assignable to type '{ id: string; isActive: boolean | null; createdAt: Date | null; updatedAt: Date | null; title: string; slug: string; content: string | null; imageUrl: string | null; requiresMembership: boolean | null; ... 7 more ...; viewCount: number | null; }'.
+  Types of property 'isActive' are incompatible.
+    Type 'boolean | null | undefined' is not assignable to type 'boolean | null'.
+      Type 'undefined' is not assignable to type 'boolean | null'.
+server/storage-full.ts(674,9): error TS2416: Property 'getAdminStats' in type 'MemStorage' is not assignable to the same property in base type 'IStorage'.
+  Type '() => Promise<{ totalMembers: number; totalDoctors: number; totalClinics: number; totalOrders: number; totalRevenue: number; activeTraining: number; }>' is not assignable to type '() => Promise<{ totalMembers: number; totalDoctors: number; totalClinics: number; totalOrders: number; totalProducts: number; totalModules: number; totalQuizzes: number; recentSignups: number; activeUsers: number; }>'.
+    Type 'Promise<{ totalMembers: number; totalDoctors: number; totalClinics: number; totalOrders: number; totalRevenue: number; activeTraining: number; }>' is not assignable to type 'Promise<{ totalMembers: number; totalDoctors: number; totalClinics: number; totalOrders: number; totalProducts: number; totalModules: number; totalQuizzes: number; recentSignups: number; activeUsers: number; }>'.
+      Type '{ totalMembers: number; totalDoctors: number; totalClinics: number; totalOrders: number; totalRevenue: number; activeTraining: number; }' is missing the following properties from type '{ totalMembers: number; totalDoctors: number; totalClinics: number; totalOrders: number; totalProducts: number; totalModules: number; totalQuizzes: number; recentSignups: number; activeUsers: number; }': totalProducts, totalModules, totalQuizzes, recentSignups, activeUsers
