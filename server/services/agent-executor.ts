@@ -268,6 +268,7 @@ const AGENT_DIVISION_MAP: Record<string, string> = {
   'PRISM': 'Marketing', 'prism': 'Marketing',
   'AURORA': 'Marketing', 'aurora': 'Marketing',
   'MUSE': 'Marketing', 'muse': 'Marketing',
+  'ANTIGRAVITY': 'Engineering', 'antigravity': 'Engineering',
   'FORGE': 'Engineering', 'forge': 'Engineering',
   'DAEDALUS': 'Engineering', 'daedalus': 'Engineering',
   'NEXUS': 'Engineering', 'nexus': 'Engineering',
@@ -375,7 +376,7 @@ const DOCUMENT_AGENTS = [
   'JURIS', 'juris', 'LEXICON', 'lexicon', 'AEGIS', 'aegis', 'SCRIBE', 'scribe',
   'ATLAS', 'atlas', 'HERMES', 'hermes',
   'DAEDALUS', 'daedalus', 'NEXUS', 'nexus',
-  'FORGE', 'forge',
+  'FORGE', 'forge', 'ANTIGRAVITY', 'antigravity',
   'SENTINEL', 'sentinel', 'ATHENA', 'athena', 'MUSE', 'muse',
   'DR-TRIAGE', 'dr-triage', 'ALLIO-SUPPORT', 'allio-support',
   'MAX-MINERAL', 'max-mineral', 'PETE', 'pete', 'DIANE', 'diane',
@@ -706,6 +707,22 @@ export async function executeAgentTask(taskId: string): Promise<TaskExecutionRes
 
       await sentinel.notifyTaskCompleted(agentId, division, task.title, uploadResult.webViewLink, taskId);
 
+      // Route update to Antigravity to implement natively
+      if (agentId !== 'antigravity' && agentId !== 'ANTIGRAVITY') {
+        await storage.createAgentTask({
+          agentId: 'antigravity',
+          division: 'engineering',
+          title: `Implement Output: ${task.title}`,
+          description: `Agent ${agentId} has produced a new visual asset. Please implement this update into the codebase.\n\nDescription: ${task.description}\n\nAsset URL: ${uploadResult.webViewLink}`,
+          status: 'pending',
+          priority: 1,
+          assignedBy: agentId,
+          parentTaskId: taskId,
+          crossDivisionFrom: division
+        });
+        console.log(`[Agent Executor] Routed asset implementation task to ANTIGRAVITY`);
+      }
+
       return {
         success: true,
         outputUrl: uploadResult.webViewLink,
@@ -742,6 +759,22 @@ export async function executeAgentTask(taskId: string): Promise<TaskExecutionRes
       });
 
       await sentinel.notifyTaskCompleted(agentId, division, task.title, uploadResult.webViewLink, taskId);
+
+      // Route update to Antigravity to implement natively
+      if (agentId !== 'antigravity' && agentId !== 'ANTIGRAVITY') {
+        await storage.createAgentTask({
+          agentId: 'antigravity',
+          division: 'engineering',
+          title: `Implement Document Output: ${task.title}`,
+          description: `Agent ${agentId} has generated a new document/code output. Please review and implement the contents of this document into the codebase where necessary.\n\nDescription: ${task.description}\n\nOutput URL: ${uploadResult.webViewLink}`,
+          status: 'pending',
+          priority: 1,
+          assignedBy: agentId,
+          parentTaskId: taskId,
+          crossDivisionFrom: division
+        });
+        console.log(`[Agent Executor] Routed document implementation task to ANTIGRAVITY`);
+      }
 
       return {
         success: true,
