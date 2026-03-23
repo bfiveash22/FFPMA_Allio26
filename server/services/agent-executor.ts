@@ -709,18 +709,26 @@ export async function executeAgentTask(taskId: string): Promise<TaskExecutionRes
 
       // Route update to Antigravity to implement natively
       if (agentId !== 'antigravity' && agentId !== 'ANTIGRAVITY') {
-        await storage.createAgentTask({
-          agentId: 'antigravity',
-          division: 'engineering',
-          title: `Implement Output: ${task.title}`,
-          description: `Agent ${agentId} has produced a new visual asset. Please implement this update into the codebase.\n\nDescription: ${task.description}\n\nAsset URL: ${uploadResult.webViewLink}`,
-          status: 'pending',
-          priority: 1,
-          assignedBy: agentId,
-          parentTaskId: taskId,
-          crossDivisionFrom: division
-        });
-        console.log(`[Agent Executor] Routed asset implementation task to ANTIGRAVITY`);
+        const existingImplTask = tasks.find(t => 
+          t.agentId.toLowerCase() === 'antigravity' && 
+          t.parentTaskId === taskId && 
+          t.title.includes('Implement Output')
+        );
+        
+        if (!existingImplTask) {
+          await storage.createAgentTask({
+            agentId: 'antigravity',
+            division: 'engineering',
+            title: `Implement Output: ${task.title}`,
+            description: `Agent ${agentId} has produced a new visual asset. Please implement this update into the codebase.\n\nDescription: ${task.description}\n\nAsset URL: ${uploadResult.webViewLink}`,
+            status: 'pending',
+            priority: 1,
+            assignedBy: agentId,
+            parentTaskId: taskId,
+            crossDivisionFrom: division
+          });
+          console.log(`[Agent Executor] Routed asset implementation task to ANTIGRAVITY`);
+        }
       }
 
       return {
@@ -762,18 +770,26 @@ export async function executeAgentTask(taskId: string): Promise<TaskExecutionRes
 
       // Route update to Antigravity to implement natively
       if (agentId !== 'antigravity' && agentId !== 'ANTIGRAVITY') {
-        await storage.createAgentTask({
-          agentId: 'antigravity',
-          division: 'engineering',
-          title: `Implement Document Output: ${task.title}`,
-          description: `Agent ${agentId} has generated a new document/code output. Please review and implement the contents of this document into the codebase where necessary.\n\nDescription: ${task.description}\n\nOutput URL: ${uploadResult.webViewLink}`,
-          status: 'pending',
-          priority: 1,
-          assignedBy: agentId,
-          parentTaskId: taskId,
-          crossDivisionFrom: division
-        });
-        console.log(`[Agent Executor] Routed document implementation task to ANTIGRAVITY`);
+        const existingImplTask = tasks.find(t => 
+          t.agentId.toLowerCase() === 'antigravity' && 
+          t.parentTaskId === taskId && 
+          t.title.includes('Implement Document Output')
+        );
+        
+        if (!existingImplTask) {
+          await storage.createAgentTask({
+            agentId: 'antigravity',
+            division: 'engineering',
+            title: `Implement Document Output: ${task.title}`,
+            description: `Agent ${agentId} has generated a new document/code output. Please review and implement the contents of this document into the codebase where necessary.\n\nDescription: ${task.description}\n\nOutput URL: ${uploadResult.webViewLink}`,
+            status: 'pending',
+            priority: 1,
+            assignedBy: agentId,
+            parentTaskId: taskId,
+            crossDivisionFrom: division
+          });
+          console.log(`[Agent Executor] Routed document implementation task to ANTIGRAVITY`);
+        }
       }
 
       return {

@@ -441,8 +441,8 @@ async function checkCrossDivisionRequests(): Promise<void> {
       for (const need of crossDivisionNeeds) {
         const existingSupport = allTasks.find(t => 
           t.agentId.toLowerCase() === need.targetAgent.toLowerCase() &&
-          t.description?.toLowerCase().includes(`cross-division support for ${task.agentId.toLowerCase()}`) &&
-          (t.status === 'pending' || t.status === 'in_progress')
+          (t.parentTaskId === task.id || t.description?.toLowerCase().includes(`cross-division support for ${task.agentId.toLowerCase()}`)) &&
+          t.title.includes(need.requirement)
         );
         
         if (!existingSupport) {
