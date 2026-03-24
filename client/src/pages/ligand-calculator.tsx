@@ -16,7 +16,10 @@ import {
   Heart,
   Brain,
   Sparkles,
-  Info
+  Info,
+  Settings2,
+  FlaskConical,
+  Activity as ActivityIcon
 } from "lucide-react";
 import {
   cannabinoids,
@@ -30,6 +33,19 @@ import {
   type LigandPathway,
   type ConditionProfile
 } from "@shared/ligand-pathway-data";
+import {
+  terpenes,
+  generateTitrationSchedule,
+  calculateEntourageScore,
+  type PatientGenetics,
+  type PatientConditions,
+  type TitrationSchedule
+} from "@shared/clinical-engine";
+import {
+  calculateEcsHealth,
+  cecdQuestionnaire,
+  type EcsLabMarkers
+} from "@shared/ecs-assessment";
 
 function getCategoryIcon(category: string) {
   switch (category) {
@@ -63,6 +79,26 @@ export default function LigandCalculator() {
   const [selectedProtein, setSelectedProtein] = useState<string | null>(null);
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Clinical Engine State
+  const [weightKg, setWeightKg] = useState<string>("70");
+  const [severityScore, setSeverityScore] = useState<number>(5);
+  const [activeTerpenes, setActiveTerpenes] = useState<string[]>([]);
+  const [genetics, setGenetics] = useState<PatientGenetics>({
+    comt: 'Val/Val',
+    cyp2d6: 'Normal',
+    cyp2c9: 'Normal'
+  });
+  
+  // ECS Assessment State
+  const [labMarkers, setLabMarkers] = useState<EcsLabMarkers>({
+    anandamideTone: 0.8,
+    faahLevel: 45,
+    omega6To3Ratio: 6,
+    hsCRP: 1.5
+  });
+  const [symptoms, setSymptoms] = useState<Record<string, number>>({});
+  const ecsHealth = calculateEcsHealth(symptoms, labMarkers);
 
   const filteredConditions = conditionProfiles.filter(cp =>
     cp.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,6 +135,10 @@ export default function LigandCalculator() {
             <TabsTrigger value="conditions" className="data-[state=active]:bg-cyan-600">
               <Activity className="h-4 w-4 mr-2" />
               By Condition
+            </TabsTrigger>
+            <TabsTrigger value="clinical" className="data-[state=active]:bg-cyan-600">
+              <Settings2 className="h-4 w-4 mr-2" />
+              Clinical Engine
             </TabsTrigger>
           </TabsList>
 
@@ -396,6 +436,198 @@ export default function LigandCalculator() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+          <TabsContent value="clinical" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white flex items-center gap-2">
+                    <Settings2 className="h-5 w-5 text-cyan-400" />
+                    Patient Intake & Genetics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-slate-400 mb-1 block">Weight (kg)</label>
+                      <Input 
+                        type="number" 
+                        value={weightKg} 
+                        onChange={e => setWeightKg(e.target.value)} 
+                        className="bg-slate-900 border-slate-700 text-white" 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-400 mb-1 block">Severity (1-10)</label>
+                      <Input 
+                        type="number" 
+                        min="1" max="10"
+                        value={severityScore} 
+                        onChange={e => setSeverityScore(parseInt(e.target.value) || 1)} 
+                        className="bg-slate-900 border-slate-700 text-white" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-700">
+                    <h3 className="text-sm font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                      <Dna className="h-4 w-4" /> Pharmacogenomics
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">COMT (Val158Met)</label>
+                        <select 
+                          className="w-full bg-slate-900 border border-slate-700 rounded-md text-white p-2 text-sm focus:ring-cyan-500 focus:border-cyan-500"
+                          value={genetics.comt}
+                          onChange={e => setGenetics({...genetics, comt: e.target.value as any})}
+                        >
+                          <option value="Val/Val">Val/Val (Fast clearance, resilient)</option>
+                          <option value="Val/Met">Val/Met (Intermediate)</option>
+                          <option value="Met/Met">Met/Met (Slow clearance, prone to anxiety)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">CYP2D6 Status</label>
+                        <select 
+                          className="w-full bg-slate-900 border border-slate-700 rounded-md text-white p-2 text-sm focus:ring-cyan-500 focus:border-cyan-500"
+                          value={genetics.cyp2d6}
+                          onChange={e => setGenetics({...genetics, cyp2d6: e.target.value as any})}
+                        >
+                          <option value="Normal">Normal Metabolizer</option>
+                          <option value="Intermediate">Intermediate Metabolizer</option>
+                          <option value="Poor">Poor Metabolizer (High interaction risk)</option>
+                          <option value="Ultrarapid">Ultrarapid Metabolizer</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-700">
+                    <h3 className="text-sm font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                      <ActivityIcon className="h-4 w-4" /> ECS Lab Markers
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">AEA Tone (ng/mL)</label>
+                        <Input type="number" step="0.1" value={labMarkers.anandamideTone} onChange={e => setLabMarkers({...labMarkers, anandamideTone: parseFloat(e.target.value) || 0})} className="bg-slate-900 border-slate-700 h-8 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">FAAH Activity</label>
+                        <Input type="number" value={labMarkers.faahLevel} onChange={e => setLabMarkers({...labMarkers, faahLevel: parseFloat(e.target.value) || 0})} className="bg-slate-900 border-slate-700 h-8 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">Omega 6:3 Ratio</label>
+                        <Input type="number" step="0.1" value={labMarkers.omega6To3Ratio} onChange={e => setLabMarkers({...labMarkers, omega6To3Ratio: parseFloat(e.target.value) || 0})} className="bg-slate-900 border-slate-700 h-8 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">hs-CRP (mg/L)</label>
+                        <Input type="number" step="0.1" value={labMarkers.hsCRP} onChange={e => setLabMarkers({...labMarkers, hsCRP: parseFloat(e.target.value) || 0})} className="bg-slate-900 border-slate-700 h-8 text-sm" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-700">
+                    <h3 className="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                      <FlaskConical className="h-4 w-4" /> Entourage Effect (Terpenes)
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.values(terpenes).map(t => (
+                        <Badge 
+                          key={t.id}
+                          variant="outline"
+                          className={`cursor-pointer ${activeTerpenes.includes(t.id) ? 'bg-green-900/50 text-green-300 border-green-500' : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500'}`}
+                          onClick={() => {
+                            if (activeTerpenes.includes(t.id)) {
+                              setActiveTerpenes(activeTerpenes.filter(id => id !== t.id));
+                            } else {
+                              setActiveTerpenes([...activeTerpenes, t.id]);
+                            }
+                          }}
+                        >
+                          {t.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-6">
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-white flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ActivityIcon className="h-5 w-5 text-blue-400" />
+                        ECS Health Status
+                      </div>
+                      <div className="text-2xl font-bold text-blue-400">
+                        {ecsHealth.combinedHealthScore}/100
+                      </div>
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Based on Clinical Endocannabinoid Deficiency (CECD) algorithm and lab markers.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 mb-4">
+                      {ecsHealth.recommendations.map((rec, i) => (
+                        <div key={i} className="text-xs p-2 bg-blue-900/20 text-blue-200 rounded border border-blue-900/50">
+                          {rec}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-white flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FlaskConical className="h-5 w-5 text-green-400" />
+                        Entourage Synergy Score
+                      </div>
+                      <div className="text-2xl font-bold text-green-400">
+                        {calculateEntourageScore(selectedCannabinoid ? [selectedCannabinoid] : [], activeTerpenes)}
+                      </div>
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Base score is 100. Adding synergistic terpenes and cannabinoids increases the therapeutic index.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="bg-slate-800/50 border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-white flex items-center gap-2">
+                      <ActivityIcon className="h-5 w-5 text-cyan-400" />
+                      Titration Schedule
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Personalized dose-response curve for {selectedCannabinoid || "CBD"} based on {weightKg}kg and genetics.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {generateTitrationSchedule(
+                        { weightKg: parseFloat(weightKg) || 70, severityScore, conditions: [] }, 
+                        genetics, 
+                        selectedCannabinoid || "CBD"
+                      ).map((step, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-700">
+                          <div>
+                            <div className="font-semibold text-cyan-300">{step.dayRange}</div>
+                            <div className="text-xs text-slate-400">{step.frequency} &bull; {step.notes}</div>
+                          </div>
+                          <div className="text-lg font-bold text-white text-right">
+                            {step.doseMg} <span className="text-sm font-normal text-slate-400">mg</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

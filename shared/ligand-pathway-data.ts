@@ -4,6 +4,7 @@ export interface ProteinTarget {
   function: string;
   pathways: string[];
   clinicalRelevance: string[];
+  baseIcValue?: number;
 }
 
 export interface Cannabinoid {
@@ -690,7 +691,88 @@ export const proteinTargets: Record<string, ProteinTarget> = {
     name: 'Catechol-O-Methyltransferase',
     function: 'Degrades catecholamines (dopamine, norepinephrine, epinephrine)',
     pathways: ['Catecholamine metabolism', 'Dopamine regulation', 'Estrogen metabolism'],
-    clinicalRelevance: ['Pain sensitivity', 'Psychiatric disorders', 'Parkinson\'s disease']
+    clinicalRelevance: ['Pain sensitivity', 'Psychiatric disorders', 'Parkinson\'s disease'],
+    baseIcValue: 0.8123
+  },
+  PTGS2: {
+    symbol: 'PTGS2',
+    name: 'Prostaglandin-Endoperoxide Synthase 2 (COX-2)',
+    function: 'Key enzyme in prostaglandin biosynthesis, mediates inflammation',
+    pathways: ['Arachidonic acid metabolism', 'Inflammation', 'Pain signaling'],
+    clinicalRelevance: ['Rheumatoid arthritis', 'Pain', 'Cancer'],
+    baseIcValue: 0.9412
+  },
+  MAPK1: {
+    symbol: 'MAPK1',
+    name: 'Mitogen-Activated Protein Kinase 1 (ERK2)',
+    function: 'Essential component of the MAP kinase signal transduction pathway',
+    pathways: ['MAPK signaling', 'Cell proliferation', 'Apoptosis'],
+    clinicalRelevance: ['Cancer', 'Neurodegeneration', 'Inflammation'],
+    baseIcValue: 0.8845
+  },
+  MTOR: {
+    symbol: 'MTOR',
+    name: 'Mechanistic Target Of Rapamycin Kinase',
+    function: 'Central controller of cell growth, survival, and metabolism',
+    pathways: ['mTOR signaling', 'Autophagy', 'Cell survival'],
+    clinicalRelevance: ['Cancer', 'Aging', 'Metabolic syndrome'],
+    baseIcValue: 0.7621
+  },
+  EGFR: {
+    symbol: 'EGFR',
+    name: 'Epidermal Growth Factor Receptor',
+    function: 'Receptor tyrosine kinase binding ligands of the EGF family',
+    pathways: ['ErbB signaling', 'Cell proliferation', 'Migration'],
+    clinicalRelevance: ['Oncology', 'Tissue repair', 'Inflammation'],
+    baseIcValue: 0.8105
+  },
+  TP53: {
+    symbol: 'TP53',
+    name: 'Tumor Protein P53',
+    function: 'Acts as a tumor suppressor and transcription factor',
+    pathways: ['Apoptosis', 'Cell cycle arrest', 'DNA repair'],
+    clinicalRelevance: ['Pan-cancer', 'Cellular aging', 'Apoptosis'],
+    baseIcValue: 0.9577
+  },
+  TRPV1: {
+    symbol: 'TRPV1',
+    name: 'Transient Receptor Potential Cation Channel Subfamily V Member 1',
+    function: 'Ion channel activated by capsaicin, heat, and endocannabinoids',
+    pathways: ['Sensory transduction', 'Pain signaling', 'Thermal sensation'],
+    clinicalRelevance: ['Neuropathic pain', 'Inflammation', 'Migraine'],
+    baseIcValue: 0.9123
+  },
+  TRPA1: {
+    symbol: 'TRPA1',
+    name: 'Transient Receptor Potential Cation Channel Subfamily A Member 1',
+    function: 'Receptor for environmental irritants and pain',
+    pathways: ['Sensory transduction', 'Pain signaling'],
+    clinicalRelevance: ['Neuropathic pain', 'Asthma', 'Cough'],
+    baseIcValue: 0.8401
+  },
+  FAAH: {
+    symbol: 'FAAH',
+    name: 'Fatty Acid Amide Hydrolase',
+    function: 'Primary degradative enzyme for anandamide',
+    pathways: ['Endocannabinoid signaling', 'Lipid metabolism'],
+    clinicalRelevance: ['Anxiety', 'Pain', 'Inflammation'],
+    baseIcValue: 0.9452
+  },
+  PPARG: {
+    symbol: 'PPARG',
+    name: 'Peroxisome Proliferator Activated Receptor Gamma',
+    function: 'Nuclear receptor regulating fatty acid storage and glucose metabolism',
+    pathways: ['Adipogenesis', 'Lipid metabolism', 'Insulin sensitivity'],
+    clinicalRelevance: ['Type 2 Diabetes', 'Metabolic syndrome', 'Inflammation'],
+    baseIcValue: 0.8654
+  },
+  NOS3: {
+    symbol: 'NOS3',
+    name: 'Nitric Oxide Synthase 3',
+    function: 'Produces nitric oxide implicated in vascular smooth muscle relaxation',
+    pathways: ['Vasodilation', 'Blood pressure regulation', 'Endothelial function'],
+    clinicalRelevance: ['Hypertension', 'Cardiovascular disease', 'Glaucoma'],
+    baseIcValue: 0.7781
   }
 };
 
@@ -883,10 +965,122 @@ export const ligandPathways: LigandPathway[] = [
   { cannabinoid: 'THC8', protein: 'CNR1', effect: 'activates', bindingAffinity: 'moderate', clinicalImplication: 'Milder psychoactive effects than Δ9-THC' },
   { cannabinoid: 'THC8', protein: 'TNF', effect: 'inhibits', bindingAffinity: 'moderate', clinicalImplication: 'Anti-inflammatory' },
   { cannabinoid: 'CBG', protein: 'CNR1', effect: 'modulates', bindingAffinity: 'low', clinicalImplication: 'Partial agonist effects' },
-  { cannabinoid: 'CBG', protein: 'CNR2', effect: 'modulates', bindingAffinity: 'low', clinicalImplication: 'Immune modulation' }
+  { cannabinoid: 'CBG', protein: 'CNR2', effect: 'modulates', bindingAffinity: 'low', clinicalImplication: 'Immune modulation' },
+  { cannabinoid: 'CBD', protein: 'FAAH', effect: 'inhibits', bindingAffinity: 'high', clinicalImplication: 'Increases endogenous anandamide levels' },
+  { cannabinoid: 'CBD', protein: 'TRPV1', effect: 'activates', bindingAffinity: 'high', clinicalImplication: 'Desensitizes pain receptors over time' },
+  { cannabinoid: 'CBD', protein: 'PPARG', effect: 'activates', bindingAffinity: 'moderate', clinicalImplication: 'Improves insulin sensitivity and reduces neuroinflammation' },
+  { cannabinoid: 'THC', protein: 'PPARG', effect: 'activates', bindingAffinity: 'moderate', clinicalImplication: 'Modulates metabolic pathways and adipogenesis' },
+  { cannabinoid: 'CBDA', protein: 'PTGS2', effect: 'inhibits', bindingAffinity: 'high', clinicalImplication: 'Selective COX-2 inhibition reduces severe inflammation' },
+  { cannabinoid: 'CBG', protein: 'TRPA1', effect: 'activates', bindingAffinity: 'high', clinicalImplication: 'Modulates cutaneous pain and pruritus' },
+  { cannabinoid: 'CBC', protein: 'TRPA1', effect: 'activates', bindingAffinity: 'high', clinicalImplication: 'Strong anti-hyperalgesic effects in chronic pain models' }
 ];
 
 export const conditionProfiles: ConditionProfile[] = [
+  {
+    condition: 'Multiple Sclerosis',
+    category: 'Neurological',
+    relevantProteins: ['CNR1', 'CNR2', 'FAAH', 'TNF'],
+    recommendedCannabinoids: ['CBD', 'THC', 'CBG'],
+    rationale: 'Network analysis shows strong convergence of cannabinoid targets on key inflammatory and neuropathic pathways relevant to demyelination and spasticity.'
+  },
+  {
+    condition: 'Parkinsons Disease',
+    category: 'Neurological',
+    relevantProteins: ['CNR1', 'FAAH', 'AKT1', 'CASP9'],
+    recommendedCannabinoids: ['CBD', 'THCV'],
+    rationale: 'Neuroprotective pathways via AKT1 and apoptosis regulation. THCV blocks CB1 receptors which may improve motor function.'
+  },
+  {
+    condition: 'Alzheimers Disease',
+    category: 'Neurological',
+    relevantProteins: ['CNR2', 'TNF', 'CAT', 'HMOX1'],
+    recommendedCannabinoids: ['CBD', 'THC', 'CBC'],
+    rationale: 'Reduction of neuroinflammation via CB2 and TNF. Low dose THC may clear amyloid-beta plaques.'
+  },
+  {
+    condition: 'Rheumatoid Arthritis',
+    category: 'Immunological',
+    relevantProteins: ['CNR2', 'TNF', 'PRKCA'],
+    recommendedCannabinoids: ['CBD', 'CBG', 'CBDA'],
+    rationale: 'Strong anti-inflammatory effect targeting TNF and CB2 activation in synoviocytes.'
+  },
+  {
+    condition: 'Crohns Disease',
+    category: 'Gastrointestinal',
+    relevantProteins: ['CNR1', 'CNR2', 'TNF'],
+    recommendedCannabinoids: ['CBD', 'THC', 'CBG'],
+    rationale: 'Decreases intestinal motility via CB1, reduces gut inflammation via CB2 and TNF inhibition.'
+  },
+  {
+    condition: 'Ulcerative Colitis',
+    category: 'Gastrointestinal',
+    relevantProteins: ['CNR2', 'TNF', 'MAPK1'],
+    recommendedCannabinoids: ['CBD', 'CBDA', 'CBC'],
+    rationale: 'Anti-inflammatory action and mucosal healing through CB2 activation.'
+  },
+  {
+    condition: 'PTSD',
+    category: 'Psychiatric',
+    relevantProteins: ['CNR1', 'FAAH', 'GRIN2B'],
+    recommendedCannabinoids: ['THC', 'CBD'],
+    rationale: 'Facilitates fear extinction memory via central CB1 activation and FAAH inhibition.'
+  },
+  {
+    condition: 'Endometriosis',
+    category: 'Pain',
+    relevantProteins: ['CNR1', 'CNR2', 'CYP17A1', 'TNF'],
+    recommendedCannabinoids: ['CBD', 'THC', 'CBG'],
+    rationale: 'Addresses neuropathic and inflammatory pain. Downregulates estrogenic pathways through CYP interactions.'
+  },
+  {
+    condition: 'Neuropathic Pain',
+    category: 'Pain',
+    relevantProteins: ['CNR1', 'TRPV1', 'GRIN2B'],
+    recommendedCannabinoids: ['THC', 'CBD', 'CBC'],
+    rationale: 'Desensitization of TRPV1 channels (CBD, CBC) and modulation of central pain pathways (THC).'
+  },
+  {
+    condition: 'Glaucoma',
+    category: 'Ophthalmological',
+    relevantProteins: ['CNR1', 'NOS3'],
+    recommendedCannabinoids: ['THC', 'CBG'],
+    rationale: 'Lowers intraocular pressure via CB1 receptors. CBG acts as a vasodilator.'
+  },
+  {
+    condition: 'Cachexia',
+    category: 'Metabolic',
+    relevantProteins: ['CNR1', 'MTOR', 'TNF'],
+    recommendedCannabinoids: ['THC', 'CBG'],
+    rationale: 'Stimulates appetite centrally via CB1 and reduces metabolic wasting inflammatory cytokines.'
+  },
+  {
+    condition: 'Breast Cancer (ER/PR+)',
+    category: 'Oncology',
+    relevantProteins: ['CYP17A1', 'AKT1', 'CASP9', 'MAPK1'],
+    recommendedCannabinoids: ['CBD', 'CBDA', 'CBG'],
+    rationale: 'Modulates estrogen pathways, induces apoptosis via CASP9, and reduces metastatic proliferation.'
+  },
+  {
+    condition: 'PCOS',
+    category: 'Endocrine',
+    relevantProteins: ['CYP17A1', 'PRKCB', 'INS'],
+    recommendedCannabinoids: ['CBD', 'CBDA'],
+    rationale: 'Improves insulin sensitivity and reduces hyperandrogenism through CYP inhibition.'
+  },
+  {
+    condition: 'Type 2 Diabetes',
+    category: 'Metabolic',
+    relevantProteins: ['PRKCB', 'HMGCR', 'TNF', 'PPARG'],
+    recommendedCannabinoids: ['THCV', 'CBD', 'CBG'],
+    rationale: 'THCV improves insulin sensitivity and fasting blood glucose. CBD reduces pancreatic inflammation.'
+  },
+  {
+    condition: 'Autism Spectrum Disorder',
+    category: 'Neuropsychiatric',
+    relevantProteins: ['FAAH', 'CNR2', 'MAPK3'],
+    recommendedCannabinoids: ['CBD', 'CBG'],
+    rationale: 'Reduces neuroinflammation and improves social functioning by increasing Anandamide tone.'
+  },
   {
     condition: 'Prostate Health / BPH',
     category: 'Urological',
