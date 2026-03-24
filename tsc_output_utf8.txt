@@ -1,0 +1,5 @@
+﻿
+> rest-express@1.0.0 check
+> tsc
+
+server/scripts/clean-juris-duplicates.ts(25,22): error TS2802: Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.

@@ -1,6 +1,7 @@
 import { db } from "../db";
 import { trainingTracks, trainingModules, trackModules, agentTasks, dianeKnowledge } from "@shared/schema";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+import { storage } from "../storage";
 
 export const pmaLawTrainingTrackData = {
   id: "pma-law-principles",
@@ -354,16 +355,16 @@ export async function seedPMALawTraining() {
     console.log(`[Seed] Added ${pmaLawKnowledgeEntries.length} knowledge base entries`);
     
     // 5. Create Legal agent task
-    const existingLegalTasks = await db.select().from(agentTasks).where(sql`title = ${pmaLegalAgentTask.title}`).limit(1);
+    const existingLegalTasks = await db.select().from(agentTasks).where(eq(agentTasks.title, pmaLegalAgentTask.title)).limit(1);
     if (existingLegalTasks.length === 0) {
-      await db.insert(agentTasks).values(pmaLegalAgentTask);
-      console.log("[Seed] Created Legal division task for GAVEL");
+      await storage.createAgentTask({ ...pmaLegalAgentTask, agentId: "JURIS" });
+      console.log("[Seed] Created Legal division task for JURIS");
     }
     
     // 6. Create Marketing agent task
-    const existingMarketingTasks = await db.select().from(agentTasks).where(sql`title = ${pmaMarketingAgentTask.title}`).limit(1);
+    const existingMarketingTasks = await db.select().from(agentTasks).where(eq(agentTasks.title, pmaMarketingAgentTask.title)).limit(1);
     if (existingMarketingTasks.length === 0) {
-      await db.insert(agentTasks).values(pmaMarketingAgentTask);
+      await storage.createAgentTask(pmaMarketingAgentTask);
       console.log("[Seed] Created Marketing division task for MUSE");
     }
     

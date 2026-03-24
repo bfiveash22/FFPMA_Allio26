@@ -22,7 +22,7 @@ async function clean() {
   
   if (toDelete.size > 0) {
     console.log(`Found ${toDelete.size} duplicate tasks to delete.`);
-    for (const id of toDelete) {
+    for (const id of Array.from(toDelete)) {
       await db.delete(agentTasks).where(eq(agentTasks.id, id));
     }
     console.log("Cleanup complete.");
