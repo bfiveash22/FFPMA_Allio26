@@ -11,15 +11,22 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+const USE_FINE_TUNED = process.env.ENABLE_FINE_TUNED_MODELS === 'true';
 
 interface AIModelConfig {
   provider: 'openai' | 'huggingface' | 'gemini' | 'research';
   model: string;
+  fallbackModel?: string;      // Base model for instant rollback
+  fineTunedVersion?: string;   // Model version for A/B tracking
   specialty: string[];
 }
 
 const AGENT_MODEL_ASSIGNMENTS: Record<string, AIModelConfig> = {
+  // Support Division - Fine-Tuned Domain Experts
+  'DIANE': { provider: 'openai', model: USE_FINE_TUNED ? 'ft:gpt-4o-mini-2024-07-18:ffpma:diane:v1' : 'gpt-4o-mini', fallbackModel: 'gpt-4o-mini', fineTunedVersion: 'v1.0.0', specialty: ['support', 'protocols', 'recipes'] },
+  'DR-TRIAGE': { provider: 'openai', model: USE_FINE_TUNED ? 'ft:gpt-4o-mini-2024-07-18:ffpma:dr-triage:v1' : 'gpt-4o-mini', fallbackModel: 'gpt-4o-mini', fineTunedVersion: 'v1.0.0', specialty: ['medical', 'triage', 'symptoms'] },
+  'PETE': { provider: 'openai', model: USE_FINE_TUNED ? 'ft:gpt-4o-mini-2024-07-18:ffpma:pete:v1' : 'gpt-4o-mini', fallbackModel: 'gpt-4o-mini', fineTunedVersion: 'v1.0.0', specialty: ['support', 'general', 'orders'] },
+  // Core Network
   'SENTINEL': { provider: 'openai', model: 'gpt-4o', specialty: ['orchestration', 'coordination', 'routing'] },
   'ATHENA': { provider: 'openai', model: 'gpt-4o', specialty: ['communications', 'scheduling', 'inbox'] },
   'HERMES': { provider: 'openai', model: 'gpt-4o-mini', specialty: ['workspace', 'organization', 'sync'] },
